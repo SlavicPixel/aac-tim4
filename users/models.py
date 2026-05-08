@@ -36,3 +36,35 @@ class Counselor(models.Model):
     @property
     def email(self):
         return self.user.email
+    
+class PeerSupportUser(models.Model):
+    """
+    Student savjetnik model linkan na User account.
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='peer_support_profile'
+    )
+    student = models.ForeignKey(
+        'core.Student',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='peer_supporters'
+    )
+
+    class Meta:
+        verbose_name = 'Peer Support User'
+        verbose_name_plural = 'Peer Support Users'
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @property
+    def full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @property
+    def email(self):
+        return self.user.email
