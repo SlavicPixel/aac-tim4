@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Arhiviranje studenta – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="mb-3">Arhiviranje studenta</h2>
+                <p>Jeste li sigurni da želite arhivirati studenta <strong>{{ object.full_name }}</strong>?</p>
+                <p class="text-muted">Student će biti označen kao neaktivan, ali svi podaci ostaju sačuvani u sustavu. Studenta možete kasnije reaktivirati.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'core:student_detail' object.pk %}" class="btn btn-secondary">Odustani</a>
+                    <button type="submit" class="btn btn-danger">Arhiviraj</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
