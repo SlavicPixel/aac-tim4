@@ -46,6 +46,7 @@ class Student(models.Model):
     faculty = models.CharField(max_length=200)
     study_program = models.CharField(max_length=200)
     year_of_study = models.PositiveSmallIntegerField()
+    is_active = models.BooleanField(default=True)
 
     counselors = models.ManyToManyField(
         'users.Counselor',

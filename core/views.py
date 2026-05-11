@@ -1,8 +1,9 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy, reverse
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from users.mixins import CounselorRequiredMixin
 from .forms import StudentForm
@@ -43,6 +44,7 @@ class StudentCreateView(CounselorRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['form_title'] = 'Registracija novog studenta'
         context['submit_label'] = 'Registriraj studenta'
+        context['cancel_url'] = reverse_lazy('core:student_list')
         return context
     
 class StudentListView(CounselorRequiredMixin, ListView):
@@ -80,3 +82,68 @@ class StudentListView(CounselorRequiredMixin, ListView):
         context['faculty'] = self.request.GET.get('faculty', '')
         context['year'] = self.request.GET.get('year', '')
         return context
+    
+class StudentDetailView(CounselorRequiredMixin, DetailView):
+    model = Student
+    template_name = 'core/student_detail.html'
+    context_object_name = 'student'
+
+    def get_queryset(self):
+        return Student.objects.filter(
+            counselors=self.request.user.counselor_profile
+        )
+
+
+class StudentUpdateView(CounselorRequiredMixin, UpdateView):
+    model = Student
+    form_class = StudentForm
+    template_name = 'core/student_form.html'
+
+    def get_queryset(self):
+        return Student.objects.filter(
+            counselors=self.request.user.counselor_profile
+        )
+
+    def get_success_url(self):
+        return reverse_lazy('core:student_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = f'Uređivanje studenta: {self.object.full_name}'
+        context['submit_label'] = 'Spremi promjene'
+        context['cancel_url'] = reverse('core:student_detail', kwargs={'pk': self.object.pk})
+        return context
+
+
+class StudentDeleteView(CounselorRequiredMixin, DeleteView):
+    model = Student
+    template_name = 'core/student_confirm_delete.html'
+    success_url = reverse_lazy('core:student_list')
+
+    def get_queryset(self):
+        return Student.objects.filter(
+            counselors=self.request.user.counselor_profile
+        )
+
+    def form_valid(self, form):
+        self.object = self.get_object()
+        self.object.is_active = False
+        self.object.save()
+        messages.success(self.request, f'Student {self.object.full_name} je arhiviran.')
+        return redirect(self.success_url)
+
+
+@login_required
+def student_reactivate(request, pk):
+    if not hasattr(request.user, 'counselor_profile'):
+        return redirect('core:dashboard')
+
+    student = get_object_or_404(
+        Student,
+        pk=pk,
+        counselors=request.user.counselor_profile
+    )
+    student.is_active = True
+    student.save()
+    messages.success(request, f'Student {student.full_name} je reaktiviran.')
+    return redirect('core:student_detail', pk=student.pk)
