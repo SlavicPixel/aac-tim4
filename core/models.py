@@ -29,9 +29,9 @@ class Student(models.Model):
     FEMALE = 'F'
     OTHER = 'O'
     GENDER_CHOICES = [
-        (MALE, 'Male'),
-        (FEMALE, 'Female'),
-        (OTHER, 'Other'),
+        (MALE, 'Muško'),
+        (FEMALE, 'Žensko'),
+        (OTHER, 'Ostalo'),
     ]
 
     first_name = models.CharField(max_length=100)
