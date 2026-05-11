@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Brisanje dokumenta – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="mb-3">Brisanje dokumenta</h2>
+                <p>Jeste li sigurni da želite obrisati dokument <strong>{{ object.name }}</strong>?</p>
+                <p class="text-muted">Ova akcija je nepovratna. Datoteka će biti trajno uklonjena.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'core:student_detail' object.student.pk %}" class="btn btn-secondary">Odustani</a>
+                    <button type="submit" class="btn btn-danger">Obriši dokument</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

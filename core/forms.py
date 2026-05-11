@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student
+from .models import Student, Document
 
 
 class StudentForm(forms.ModelForm):
@@ -38,3 +38,12 @@ class StudentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['date_of_birth'].input_formats = ['%d/%m/%Y']
+
+class DocumentForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ['name', 'file']
+        labels = {
+            'name': 'Naziv dokumenta',
+            'file': 'Datoteka',
+        }
