@@ -6,11 +6,15 @@
 <h1>Dobrodošli, {{ counselor.full_name }}</h1>
 <p class="lead">Ovo je vaš dashboard kao savjetnika AAC-a.</p>
 
-<a href="{% url 'core:student_create' %}" class="btn btn-primary">
-    + Registriraj novog studenta
-</a>
-
-<div class="alert alert-info">
-    Sadržaj dashboarda dolazi uskoro.
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Studenti</h5>
+                <p class="card-text">Pregled i upravljanje studentima koji su vam dodijeljeni.</p>
+                <a href="{% url 'core:student_list' %}" class="btn btn-primary">Otvori</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
