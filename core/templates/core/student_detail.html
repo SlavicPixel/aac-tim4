@@ -55,7 +55,48 @@
                 {% endif %}
             </div>
 
-            <p class="text-muted mb-0">Tu će biti lista sastanaka.</p>
+            {% with meetings=student.meetings.all %}
+                {% if meetings %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Datum i vrijeme</th>
+                                <th>Tip</th>
+                                <th>Format</th>
+                                <th>Savjetnik</th>
+                                <th class="text-end">Akcije</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for meeting in meetings %}
+                                {% if meeting.is_active %}
+                                    <tr>
+                                        <td>{{ meeting.date_time|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ meeting.get_type_display }}</td>
+                                        <td>{{ meeting.get_format_display }}</td>
+                                        <td>
+                                            {% if meeting.counselor == request.user.counselor_profile %}
+                                                <span class="text-success">Vi</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Drugi savjetnik</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            {% if meeting.counselor == request.user.counselor_profile %}
+                                                <a href="{% url 'core:meeting_detail' meeting.pk %}" class="btn btn-sm btn-outline-primary">Otvori</a>
+                                            {% else %}
+                                                <span class="text-muted small">Bez pristupa</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted mb-0">Nema sastanaka za ovog studenta.</p>
+                {% endif %}
+            {% endwith %}
         </div>
     </div>
     <div class="card mt-4">

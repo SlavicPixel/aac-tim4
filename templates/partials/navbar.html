@@ -5,6 +5,7 @@
         <div class="navbar-nav">
             {% if user.counselor_profile %}
                 <a class="nav-link" href="{% url 'core:student_list' %}">Studenti</a>
+                <a class="nav-link" href="{% url 'core:meeting_list' %}">Sastanci</a>
             {% endif %}
         </div>
 
