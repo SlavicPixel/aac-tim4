@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Sastanak – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Detalji sastanka</h1>
+    <div>
+        <!-- Ovdje ce da idu update i delete hehe -->
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Student:</strong> <a href="{% url 'core:student_detail' meeting.student.pk %}">{{ meeting.student.full_name }}</a></p>
+                <p><strong>Datum i vrijeme:</strong> {{ meeting.date_time|date:"d/m/Y H:i" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Tip:</strong> {{ meeting.get_type_display }}</p>
+                <p><strong>Format:</strong> {{ meeting.get_format_display }}</p>
+            </div>
+        </div>
+
+        <h5 class="card-title mb-3">Bilješke</h5>
+        {% if meeting.notes %}
+            <div class="card bg-light">
+                <div class="card-body">
+                    {{ meeting.notes|linebreaks }}
+                </div>
+            </div>
+        {% else %}
+            <p class="text-muted">Nema bilješki za ovaj sastanak.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'core:meeting_list' %}" class="btn btn-link">← Natrag na listu sastanaka</a>
+</div>
+{% endblock %}

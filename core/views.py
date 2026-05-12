@@ -250,3 +250,74 @@ class MeetingCreateView(CounselorRequiredMixin, CreateView):
             context['cancel_url'] = reverse('core:dashboard')
 
         return context
+    
+class MeetingListView(CounselorRequiredMixin, ListView):
+    model = Meeting
+    template_name = 'core/meeting_list.html'
+    context_object_name = 'meetings'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Meeting.objects.filter(
+            counselor=self.request.user.counselor_profile,
+            is_active=True
+        ).select_related('student')
+
+        student_id = self.request.GET.get('student', '').strip()
+        meeting_type = self.request.GET.get('type', '').strip()
+        meeting_format = self.request.GET.get('format', '').strip()
+        date_from = self.request.GET.get('date_from', '').strip()
+        date_to = self.request.GET.get('date_to', '').strip()
+
+        if student_id:
+            queryset = queryset.filter(student_id=student_id)
+
+        if meeting_type:
+            queryset = queryset.filter(type=meeting_type)
+
+        if meeting_format:
+            queryset = queryset.filter(format=meeting_format)
+
+        if date_from:
+            try:
+                from datetime import datetime
+                parsed_date = datetime.strptime(date_from, '%d/%m/%Y')
+                queryset = queryset.filter(date_time__date__gte=parsed_date.date())
+            except ValueError:
+                pass
+
+        if date_to:
+            try:
+                from datetime import datetime
+                parsed_date = datetime.strptime(date_to, '%d/%m/%Y')
+                queryset = queryset.filter(date_time__date__lte=parsed_date.date())
+            except ValueError:
+                pass
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['students'] = Student.objects.filter(
+            counselors=self.request.user.counselor_profile,
+            is_active=True
+        )
+        context['type_choices'] = Meeting.TYPE_CHOICES
+        context['format_choices'] = Meeting.FORMAT_CHOICES
+        context['selected_student'] = self.request.GET.get('student', '')
+        context['selected_type'] = self.request.GET.get('type', '')
+        context['selected_format'] = self.request.GET.get('format', '')
+        context['date_from'] = self.request.GET.get('date_from', '')
+        context['date_to'] = self.request.GET.get('date_to', '')
+        return context
+
+
+class MeetingDetailView(CounselorRequiredMixin, DetailView):
+    model = Meeting
+    template_name = 'core/meeting_detail.html'
+    context_object_name = 'meeting'
+
+    def get_queryset(self):
+        return Meeting.objects.filter(
+            counselor=self.request.user.counselor_profile
+        ).select_related('student', 'counselor__user')

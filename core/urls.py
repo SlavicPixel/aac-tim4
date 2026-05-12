@@ -15,6 +15,8 @@ urlpatterns = [
     path('students/<int:student_pk>/documents/upload/', views.DocumentUploadView.as_view(), name='document_upload'),
     path('documents/<int:pk>/delete/', views.DocumentDeleteView.as_view(), name='document_delete'),
 
+    path('meetings/', views.MeetingListView.as_view(), name='meeting_list'),
     path('meetings/new/', views.MeetingCreateView.as_view(), name='meeting_create'),
+    path('meetings/<int:pk>/', views.MeetingDetailView.as_view(), name='meeting_detail'),
     path('students/<int:student_pk>/meetings/new/', views.MeetingCreateView.as_view(), name='meeting_create_for_student'),
 ]
