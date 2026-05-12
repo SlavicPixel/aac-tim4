@@ -164,3 +164,55 @@ class Accommodation(models.Model):
 
     def __str__(self):
         return f"{self.student} – {self.description[:50]}"
+    
+class Meeting(models.Model):
+    INITIAL = 'initial'
+    FOLLOW_UP = 'follow_up'
+    OTHER = 'other'
+    TYPE_CHOICES = [
+        (INITIAL, 'Inicijalni'),
+        (FOLLOW_UP, 'Praćenje'),
+        (OTHER, 'Ostalo'),
+    ]
+
+    IN_PERSON = 'in_person'
+    PHONE = 'phone'
+    VIDEO = 'video'
+    FORMAT_CHOICES = [
+        (IN_PERSON, 'Uživo'),
+        (PHONE, 'Telefonski'),
+        (VIDEO, 'Video poziv'),
+    ]
+
+    date_time = models.DateTimeField()
+    type = models.CharField(
+        max_length=20,
+        choices=TYPE_CHOICES,
+        default=FOLLOW_UP
+    )
+    format = models.CharField(
+        max_length=20,
+        choices=FORMAT_CHOICES,
+        default=IN_PERSON
+    )
+    notes = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='meetings'
+    )
+    counselor = models.ForeignKey(
+        'users.Counselor',
+        on_delete=models.PROTECT,
+        related_name='meetings'
+    )
+
+    class Meta:
+        verbose_name = 'Meeting'
+        verbose_name_plural = 'Meetings'
+        ordering = ['-date_time']
+
+    def __str__(self):
+        return f"{self.student} – {self.date_time.strftime('%d/%m/%Y %H:%M')}"

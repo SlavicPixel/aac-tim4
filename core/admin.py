@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Disability, Student, StudentCounselor, Document, Accommodation
+from .models import Disability, Student, StudentCounselor, Document, Accommodation, Meeting
 
 
 @admin.register(Disability)
@@ -34,3 +34,10 @@ class AccommodationAdmin(admin.ModelAdmin):
     list_display = ['student', 'type', 'status', 'start_date', 'end_date']
     list_filter = ['type', 'status']
     search_fields = ['description', 'student__first_name', 'student__last_name']
+
+@admin.register(Meeting)
+class MeetingAdmin(admin.ModelAdmin):
+    list_display = ['student', 'counselor', 'date_time', 'type', 'format', 'is_active']
+    list_filter = ['type', 'format', 'is_active', 'date_time']
+    search_fields = ['student__first_name', 'student__last_name', 'notes']
+    date_hierarchy = 'date_time'

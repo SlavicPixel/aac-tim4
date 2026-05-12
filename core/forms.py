@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student, Document
+from .models import Student, Document, Meeting
 
 
 class StudentForm(forms.ModelForm):
@@ -47,3 +47,44 @@ class DocumentForm(forms.ModelForm):
             'name': 'Naziv dokumenta',
             'file': 'Datoteka',
         }
+
+class MeetingForm(forms.ModelForm):
+    class Meta:
+        model = Meeting
+        fields = ['student', 'date_time', 'type', 'format', 'notes']
+        widgets = {
+            'date_time': forms.DateTimeInput(
+                attrs={
+                    'type': 'text',
+                    'placeholder': 'dd/mm/yyyy HH:MM',
+                },
+                format='%d/%m/%Y %H:%M'
+            ),
+            'notes': forms.Textarea(attrs={'rows': 5}),
+        }
+        labels = {
+            'student': 'Student',
+            'date_time': 'Datum i vrijeme',
+            'type': 'Tip sastanka',
+            'format': 'Format',
+            'notes': 'Bilješke',
+        }
+
+    def __init__(self, *args, **kwargs):
+        counselor = kwargs.pop('counselor', None)
+        student = kwargs.pop('student', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['date_time'].input_formats = ['%d/%m/%Y %H:%M']
+
+        # Limit student choices to those assigned to the counselor
+        if counselor:
+            self.fields['student'].queryset = Student.objects.filter(
+                counselors=counselor,
+                is_active=True
+            )
+
+        # If creating meeting from student detail, lock the student field
+        if student:
+            self.fields['student'].initial = student
+            self.fields['student'].disabled = True
