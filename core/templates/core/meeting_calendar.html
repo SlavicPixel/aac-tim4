@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kalendar sastanaka – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Kalendar sastanaka</h1>
+    <a href="{% url 'core:meeting_create' %}" class="btn btn-primary">
+        + Novi sastanak
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex gap-2">
+                <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-outline-secondary">‹ Prethodni</a>
+                <a href="?year={{ today_year }}&month={{ today_month }}" class="btn btn-outline-secondary">Danas</a>
+                <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-outline-secondary">Sljedeći ›</a>
+            </div>
+            <h3 class="mb-0">{{ month_name }} {{ year }}</h3>
+            <div class="d-flex gap-2">
+                <a href="{% url 'core:meeting_list' %}" class="btn btn-outline-secondary">Prikaži kao listu</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table calendar-table mb-0">
+            <thead>
+                <tr>
+                    {% for day in weekday_names %}
+                        <th class="text-center calendar-weekday">{{ day }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for week in weeks %}
+                    <tr>
+                        {% for day in week %}
+                            <td class="calendar-day {% if not day.is_current_month %}calendar-day-other-month{% endif %} {% if day.is_today %}calendar-day-today{% endif %}">
+                                <div class="calendar-day-number">{{ day.date.day }}</div>
+                                {% if day.meetings %}
+                                    <div class="calendar-meetings">
+                                        {% for meeting in day.meetings %}
+                                            <a href="{% url 'core:meeting_detail' meeting.pk %}" class="calendar-meeting" title="{{ meeting.student.full_name }} – {{ meeting.get_type_display }}">
+                                                <span class="calendar-meeting-time">{{ meeting.date_time|date:"H:i" }}</span>
+                                                <span class="calendar-meeting-student">{{ meeting.student.full_name }}</span>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/calendar.css' %}">
+{% endblock %}
