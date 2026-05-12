@@ -4,11 +4,27 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Detalji sastanka</h1>
     <div>
-        <!-- Ovdje ce da idu update i delete hehe -->
+        <h1>Detalji sastanka</h1>
+        {% if not meeting.is_active %}
+            <span class="badge bg-warning text-dark">Arhiviran</span>
+        {% endif %}
+    </div>
+    <div>
+        {% if meeting.is_active %}
+            <a href="{% url 'core:meeting_update' meeting.pk %}" class="btn btn-secondary">Uredi</a>
+            <a href="{% url 'core:meeting_delete' meeting.pk %}" class="btn btn-danger">Arhiviraj</a>
+        {% else %}
+            <a href="{% url 'core:meeting_reactivate' meeting.pk %}" class="btn btn-success">Reaktiviraj</a>
+        {% endif %}
     </div>
 </div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
 
 <div class="card">
     <div class="card-body">

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Arhiviranje sastanka – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="mb-3">Arhiviranje sastanka</h2>
+                <p>Jeste li sigurni da želite arhivirati sastanak sa studentom <strong>{{ object.student.full_name }}</strong> ({{ object.date_time|date:"d/m/Y H:i" }})?</p>
+                <p class="text-muted">Sastanak će biti označen kao neaktivan, ali svi podaci ostaju sačuvani u sustavu.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'core:meeting_detail' object.pk %}" class="btn btn-secondary">Odustani</a>
+                    <button type="submit" class="btn btn-danger">Arhiviraj</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -325,6 +325,67 @@ class MeetingDetailView(CounselorRequiredMixin, DetailView):
             counselor=self.request.user.counselor_profile
         ).select_related('student', 'counselor__user')
     
+class MeetingUpdateView(CounselorRequiredMixin, UpdateView):
+    model = Meeting
+    form_class = MeetingForm
+    template_name = 'core/meeting_form.html'
+
+    def get_queryset(self):
+        return Meeting.objects.filter(
+            counselor=self.request.user.counselor_profile
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['counselor'] = self.request.user.counselor_profile
+        return kwargs
+
+    def get_success_url(self):
+        return reverse('core:meeting_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Uređivanje sastanka'
+        context['submit_label'] = 'Spremi promjene'
+        context['cancel_url'] = reverse('core:meeting_detail', kwargs={'pk': self.object.pk})
+        return context
+
+
+class MeetingDeleteView(CounselorRequiredMixin, DeleteView):
+    model = Meeting
+    template_name = 'core/meeting_confirm_delete.html'
+
+    def get_queryset(self):
+        return Meeting.objects.filter(
+            counselor=self.request.user.counselor_profile
+        )
+
+    def get_success_url(self):
+        return reverse('core:meeting_list')
+
+    def form_valid(self, form):
+        self.object = self.get_object()
+        self.object.is_active = False
+        self.object.save()
+        messages.success(self.request, 'Sastanak je arhiviran.')
+        return redirect(self.get_success_url())
+
+
+@login_required
+def meeting_reactivate(request, pk):
+    if not hasattr(request.user, 'counselor_profile'):
+        return redirect('core:dashboard')
+
+    meeting = get_object_or_404(
+        Meeting,
+        pk=pk,
+        counselor=request.user.counselor_profile
+    )
+    meeting.is_active = True
+    meeting.save()
+    messages.success(request, 'Sastanak je reaktiviran.')
+    return redirect('core:meeting_detail', pk=meeting.pk)
+    
 class MeetingCalendarView(CounselorRequiredMixin, ListView):
     template_name = 'core/meeting_calendar.html'
     context_object_name = 'meetings'
