@@ -6,8 +6,8 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from users.mixins import CounselorRequiredMixin
-from .forms import StudentForm, DocumentForm
-from .models import Student, StudentCounselor, Document
+from .forms import StudentForm, DocumentForm, MeetingForm
+from .models import Student, StudentCounselor, Document, Meeting
 
 
 @login_required
@@ -203,3 +203,50 @@ class DocumentDeleteView(CounselorRequiredMixin, DeleteView):
         
         messages.success(self.request, f'Dokument "{document_name}" je obrisan.')
         return redirect('core:student_detail', pk=student_pk)
+    
+class MeetingCreateView(CounselorRequiredMixin, CreateView):
+    model = Meeting
+    form_class = MeetingForm
+    template_name = 'core/meeting_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.student = None
+        student_pk = kwargs.get('student_pk')
+        if student_pk and hasattr(request.user, 'counselor_profile'):
+            self.student = get_object_or_404(
+                Student,
+                pk=student_pk,
+                counselors=request.user.counselor_profile
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['counselor'] = self.request.user.counselor_profile
+        if self.student:
+            kwargs['student'] = self.student
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.counselor = self.request.user.counselor_profile
+        # If student was locked in form, explicitly set it
+        if self.student:
+            form.instance.student = self.student
+        response = super().form_valid(form)
+        messages.success(self.request, f'Sastanak sa studentom {self.object.student.full_name} je uspješno evidentiran.')
+        return response
+
+    def get_success_url(self):
+        return reverse('core:student_detail', kwargs={'pk': self.object.student.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Evidencija novog sastanka'
+        context['submit_label'] = 'Evidentiraj sastanak'
+
+        if self.student:
+            context['cancel_url'] = reverse('core:student_detail', kwargs={'pk': self.student.pk})
+        else:
+            context['cancel_url'] = reverse('core:dashboard')
+
+        return context
