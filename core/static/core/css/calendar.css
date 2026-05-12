@@ -1,0 +1,71 @@
+.calendar-table {
+    table-layout: fixed;
+}
+
+.calendar-weekday {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    font-weight: 600;
+}
+
+.calendar-day {
+    height: 120px;
+    vertical-align: top;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    position: relative;
+}
+
+.calendar-day-number {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.calendar-day-other-month {
+    background-color: #f8f9fa;
+}
+
+.calendar-day-other-month .calendar-day-number {
+    color: #adb5bd;
+}
+
+.calendar-day-today {
+    background-color: #cfe2ff;
+    border: 2px solid #0d6efd;
+}
+
+.calendar-day-today .calendar-day-number {
+    color: #0d6efd;
+    font-weight: 700;
+}
+
+.calendar-meetings {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 0.25rem;
+}
+
+.calendar-meeting {
+    display: block;
+    background-color: #0d6efd;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.calendar-meeting:hover {
+    background-color: #0b5ed7;
+    color: white;
+}
+
+.calendar-meeting-time {
+    font-weight: 600;
+    margin-right: 4px;
+}

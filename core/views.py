@@ -3,12 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.utils import timezone
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
+
+from calendar import Calendar, month_name
+from datetime import date, datetime
 
 from users.mixins import CounselorRequiredMixin
 from .forms import StudentForm, DocumentForm, MeetingForm
 from .models import Student, StudentCounselor, Document, Meeting
-
 
 @login_required
 def dashboard(request):
@@ -321,3 +324,86 @@ class MeetingDetailView(CounselorRequiredMixin, DetailView):
         return Meeting.objects.filter(
             counselor=self.request.user.counselor_profile
         ).select_related('student', 'counselor__user')
+    
+class MeetingCalendarView(CounselorRequiredMixin, ListView):
+    template_name = 'core/meeting_calendar.html'
+    context_object_name = 'meetings'
+
+    def get_queryset(self):
+        year, month = self._get_year_month()
+        return Meeting.objects.filter(
+            counselor=self.request.user.counselor_profile,
+            is_active=True,
+            date_time__year=year,
+            date_time__month=month
+        ).select_related('student').order_by('date_time')
+
+    def _get_year_month(self):
+        today = timezone.now().date()
+        try:
+            year = int(self.request.GET.get('year', today.year))
+            month = int(self.request.GET.get('month', today.month))
+            if month < 1 or month > 12:
+                raise ValueError
+        except (ValueError, TypeError):
+            year, month = today.year, today.month
+        return year, month
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        year, month = self._get_year_month()
+        today = timezone.now().date()
+
+        # Group meetings by day
+        meetings_by_day = {}
+        for meeting in context['meetings']:
+            day = meeting.date_time.day
+            meetings_by_day.setdefault(day, []).append(meeting)
+
+        # Generate calendar grid (weeks of (day, is_current_month) tuples)
+        cal = Calendar(firstweekday=0)  # Monday = 0
+        weeks = []
+        for week in cal.monthdatescalendar(year, month):
+            week_data = []
+            for day_date in week:
+                is_current_month = day_date.month == month
+                day_meetings = meetings_by_day.get(day_date.day, []) if is_current_month else []
+                week_data.append({
+                    'date': day_date,
+                    'is_current_month': is_current_month,
+                    'is_today': day_date == today,
+                    'meetings': day_meetings,
+                })
+            weeks.append(week_data)
+
+        # Navigation
+        if month == 1:
+            prev_year, prev_month = year - 1, 12
+        else:
+            prev_year, prev_month = year, month - 1
+
+        if month == 12:
+            next_year, next_month = year + 1, 1
+        else:
+            next_year, next_month = year, month + 1
+
+        croatian_months = [
+            'Siječanj', 'Veljača', 'Ožujak', 'Travanj', 'Svibanj', 'Lipanj',
+            'Srpanj', 'Kolovoz', 'Rujan', 'Listopad', 'Studeni', 'Prosinac'
+        ]
+
+        context.update({
+            'year': year,
+            'month': month,
+            'month_name': croatian_months[month - 1],
+            'weeks': weeks,
+            'prev_year': prev_year,
+            'prev_month': prev_month,
+            'next_year': next_year,
+            'next_month': next_month,
+            'today_year': today.year,
+            'today_month': today.month,
+            'weekday_names': ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned'],
+        })
+
+        return context
