@@ -4,11 +4,13 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from calendar import Calendar, month_name
 from datetime import date, datetime
+from weasyprint import HTML
 
 from users.mixins import CounselorRequiredMixin
 from .forms import StudentForm, DocumentForm, MeetingForm, AccommodationForm
@@ -587,3 +589,40 @@ def guidelines_api(request):
         ]
     }
     return JsonResponse(data)
+
+class AccommodationPDFView(CounselorRequiredMixin, DetailView):
+    """
+    Generates a PDF document for an accommodation that can be sent to the coordinator.
+    """
+    model = Accommodation
+
+    def get_queryset(self):
+        return Accommodation.objects.filter(
+            student__counselors=self.request.user.counselor_profile
+        ).select_related('student', 'disability')
+
+    def get(self, request, *args, **kwargs):
+        accommodation = self.get_object()
+
+        if accommodation.disability:
+            guidelines = Guideline.objects.filter(disabilities=accommodation.disability)
+        else:
+            guidelines = Guideline.objects.none()
+
+        context = {
+            'accommodation': accommodation,
+            'student': accommodation.student,
+            'counselor': request.user.counselor_profile,
+            'guidelines': guidelines,
+            'today': timezone.now().date(),
+        }
+
+        html_string = render_to_string('core/accommodation_pdf.html', context)
+        html = HTML(string=html_string)
+        pdf = html.write_pdf()
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"prilagodba_{accommodation.student.last_name}_{accommodation.pk}.pdf"
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+
+        return response
