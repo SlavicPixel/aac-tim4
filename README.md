@@ -69,13 +69,31 @@ b2199de1879f   postgres:17   "docker-entrypoint.s…"   13 minutes ago   Up 13 m
 python manage.py migrate
 ```
 
-### 6. Kreiraj superusera
+### 6. Inicijalni podaci za razvoj
+
+Za brzo postavljanje testnih podataka, koristi seed komandu:
 
 ```bash
-python manage.py createsuperuser
+python manage.py seed_data
 ```
 
-Prati upute za unos username-a, email-a i lozinke.
+Komanda kreira:
+
+- Superusera (`admin` / `admin`)
+- 2 savjetnika (`savjetnik1`, `savjetnik2` / `password123`)
+- 2 peer support korisnika (`peer1`, `peer2` / `password123`)
+- 10 vrsta teškoća
+- 3 smjernice za izradu prilagodbi
+- 4 studenta s dodijeljenim savjetnicima
+- Test sastanke i prilagodbe
+
+Ako želiš resetirati postojeće podatke prije seed-a:
+
+```bash
+python manage.py seed_data --reset
+```
+
+**Napomena:** `--reset` briše sve podatke osim superusera kreiranog ručno kroz `createsuperuser`.
 
 ### 7. Pokreni development server
 
