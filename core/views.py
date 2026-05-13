@@ -4,14 +4,15 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.http import JsonResponse
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from calendar import Calendar, month_name
 from datetime import date, datetime
 
 from users.mixins import CounselorRequiredMixin
-from .forms import StudentForm, DocumentForm, MeetingForm
-from .models import Student, StudentCounselor, Document, Meeting
+from .forms import StudentForm, DocumentForm, MeetingForm, AccommodationForm
+from .models import Student, StudentCounselor, Document, Meeting, Accommodation, Disability, Guideline
 
 @login_required
 def dashboard(request):
@@ -468,3 +469,121 @@ class MeetingCalendarView(CounselorRequiredMixin, ListView):
         })
 
         return context
+    
+class AccommodationCreateView(CounselorRequiredMixin, CreateView):
+    model = Accommodation
+    form_class = AccommodationForm
+    template_name = 'core/accommodation_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if hasattr(request.user, 'counselor_profile'):
+            self.student = get_object_or_404(
+                Student,
+                pk=kwargs['student_pk'],
+                counselors=request.user.counselor_profile
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.student = self.student
+        response = super().form_valid(form)
+        messages.success(self.request, 'Prilagodba je uspješno kreirana.')
+        return response
+
+    def get_success_url(self):
+        return reverse('core:student_detail', kwargs={'pk': self.student.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['student'] = self.student
+        context['form_title'] = f'Nova prilagodba za studenta: {self.student.full_name}'
+        context['submit_label'] = 'Kreiraj prilagodbu'
+        context['cancel_url'] = reverse('core:student_detail', kwargs={'pk': self.student.pk})
+        return context
+
+
+class AccommodationDetailView(CounselorRequiredMixin, DetailView):
+    model = Accommodation
+    template_name = 'core/accommodation_detail.html'
+    context_object_name = 'accommodation'
+
+    def get_queryset(self):
+        return Accommodation.objects.filter(
+            student__counselors=self.request.user.counselor_profile
+        ).select_related('student', 'disability')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.object.disability:
+            context['guidelines'] = Guideline.objects.filter(
+                disabilities=self.object.disability
+            )
+        else:
+            context['guidelines'] = Guideline.objects.none()
+        return context
+
+
+class AccommodationUpdateView(CounselorRequiredMixin, UpdateView):
+    model = Accommodation
+    form_class = AccommodationForm
+    template_name = 'core/accommodation_form.html'
+
+    def get_queryset(self):
+        return Accommodation.objects.filter(
+            student__counselors=self.request.user.counselor_profile
+        )
+
+    def get_success_url(self):
+        return reverse('core:accommodation_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['student'] = self.object.student
+        context['form_title'] = f'Uređivanje prilagodbe za studenta: {self.object.student.full_name}'
+        context['submit_label'] = 'Spremi promjene'
+        context['cancel_url'] = reverse('core:accommodation_detail', kwargs={'pk': self.object.pk})
+        return context
+
+
+class AccommodationDeleteView(CounselorRequiredMixin, DeleteView):
+    model = Accommodation
+    template_name = 'core/accommodation_confirm_delete.html'
+
+    def get_queryset(self):
+        return Accommodation.objects.filter(
+            student__counselors=self.request.user.counselor_profile
+        )
+
+    def get_success_url(self):
+        return reverse('core:student_detail', kwargs={'pk': self.object.student.pk})
+
+    def form_valid(self, form):
+        self.object = self.get_object()
+        student_pk = self.object.student.pk
+        self.object.delete()
+        messages.success(self.request, 'Prilagodba je obrisana.')
+        return redirect('core:student_detail', pk=student_pk)
+    
+@login_required
+def guidelines_api(request):
+    """
+    API endpoint that returns guidelines for a given disability.
+    Used by the accommodation form to dynamically load guidelines.
+    """
+    disability_id = request.GET.get('disability')
+    if not disability_id:
+        return JsonResponse({'guidelines': []})
+
+    try:
+        disability = Disability.objects.get(pk=disability_id)
+    except Disability.DoesNotExist:
+        return JsonResponse({'guidelines': []})
+
+    guidelines = Guideline.objects.filter(disabilities=disability)
+    data = {
+        'guidelines': [
+            {'title': g.title, 'content': g.content}
+            for g in guidelines
+        ]
+    }
+    return JsonResponse(data)

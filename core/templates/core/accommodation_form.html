@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{{ form_title }} – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="mb-4">{{ form_title }}</h2>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="d-flex justify-content-end mt-3">
+                                <a href="{{ cancel_url }}" class="btn btn-secondary me-2">Odustani</a>
+                                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Smjernice</h5>
+                                <p class="text-muted small">Odaberite vrstu teškoće za prikaz relevantnih smjernica.</p>
+                                <div id="guidelines-container">
+                                    <p class="text-muted">Smjernice će se prikazati ovdje.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/accommodation_form.js' %}"></script>
+{% endblock %}

@@ -23,4 +23,11 @@ urlpatterns = [
     path('meetings/<int:pk>/delete/', views.MeetingDeleteView.as_view(), name='meeting_delete'),
     path('meetings/<int:pk>/reactivate/', views.meeting_reactivate, name='meeting_reactivate'),
     path('students/<int:student_pk>/meetings/new/', views.MeetingCreateView.as_view(), name='meeting_create_for_student'),
+
+    path('students/<int:student_pk>/accommodations/new/', views.AccommodationCreateView.as_view(), name='accommodation_create'),
+    path('accommodations/<int:pk>/', views.AccommodationDetailView.as_view(), name='accommodation_detail'),
+    path('accommodations/<int:pk>/edit/', views.AccommodationUpdateView.as_view(), name='accommodation_update'),
+    path('accommodations/<int:pk>/delete/', views.AccommodationDeleteView.as_view(), name='accommodation_delete'),
+
+    path('api/guidelines/', views.guidelines_api, name='guidelines_api')
 ]

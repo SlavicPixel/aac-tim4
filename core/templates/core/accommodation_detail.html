@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Prilagodba – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Prilagodba</h1>
+    <div>
+        <a href="{% url 'core:accommodation_update' accommodation.pk %}" class="btn btn-secondary">Uredi</a>
+        <a href="{% url 'core:accommodation_delete' accommodation.pk %}" class="btn btn-danger">Obriši</a>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Student:</strong> <a href="{% url 'core:student_detail' accommodation.student.pk %}">{{ accommodation.student.full_name }}</a></p>
+                        <p><strong>Vrsta teškoće:</strong> {{ accommodation.disability.name|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Tip:</strong> {{ accommodation.get_type_display }}</p>
+                        <p><strong>Status:</strong> <span class="badge bg-info">{{ accommodation.get_status_display }}</span></p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Datum početka:</strong> {{ accommodation.start_date|date:"d/m/Y"|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Datum završetka:</strong> {{ accommodation.end_date|date:"d/m/Y"|default:"-" }}</p>
+                    </div>
+                </div>
+
+                <h5 class="mt-4">Opis prilagodbe</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        {{ accommodation.description|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if guidelines %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Relevantne smjernice</h5>
+                    {% for guideline in guidelines %}
+                        <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                            <h6>{{ guideline.title }}</h6>
+                            <p class="small mb-0">{{ guideline.content }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'core:student_detail' accommodation.student.pk %}" class="btn btn-link">← Natrag na studenta</a>
+</div>
+{% endblock %}

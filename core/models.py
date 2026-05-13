@@ -4,8 +4,8 @@ class Disability(models.Model):
     PERMANENT = 'permanent'
     TEMPORARY = 'temporary'
     TYPE_CHOICES = [
-        (PERMANENT, 'Permanent'),
-        (TEMPORARY, 'Temporary'),
+        (PERMANENT, 'Trajna'),
+        (TEMPORARY, 'Privremena'),
     ]
 
     name = models.CharField(max_length=200)
@@ -115,8 +115,8 @@ class Accommodation(models.Model):
     PERMANENT = 'permanent'
     TEMPORARY = 'temporary'
     TYPE_CHOICES = [
-        (PERMANENT, 'Permanent'),
-        (TEMPORARY, 'Temporary'),
+        (PERMANENT, 'Trajna'),
+        (TEMPORARY, 'Privremena'),
     ]
 
     PROPOSED = 'proposed'
@@ -124,10 +124,10 @@ class Accommodation(models.Model):
     ACTIVE = 'active'
     EXPIRED = 'expired'
     STATUS_CHOICES = [
-        (PROPOSED, 'Proposed'),
-        (APPROVED, 'Approved'),
-        (ACTIVE, 'Active'),
-        (EXPIRED, 'Expired'),
+        (PROPOSED, 'Predložena'),
+        (APPROVED, 'Odobrena'),
+        (ACTIVE, 'Aktivna'),
+        (EXPIRED, 'Istekla'),
     ]
 
     description = models.TextField()
@@ -216,3 +216,19 @@ class Meeting(models.Model):
 
     def __str__(self):
         return f"{self.student} – {self.date_time.strftime('%d/%m/%Y %H:%M')}"
+    
+class Guideline(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    disabilities = models.ManyToManyField(
+        Disability,
+        related_name='guidelines'
+    )
+
+    class Meta:
+        verbose_name = 'Guideline'
+        verbose_name_plural = 'Guidelines'
+        ordering = ['title']
+
+    def __str__(self):
+        return self.title

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student, Document, Meeting
+from .models import Student, Document, Meeting, Accommodation
 
 
 class StudentForm(forms.ModelForm):
@@ -88,3 +88,32 @@ class MeetingForm(forms.ModelForm):
         if student:
             self.fields['student'].initial = student
             self.fields['student'].disabled = True
+
+class AccommodationForm(forms.ModelForm):
+    class Meta:
+        model = Accommodation
+        fields = ['disability', 'description', 'type', 'status', 'start_date', 'end_date']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 5}),
+            'start_date': forms.DateInput(
+                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy'},
+                format='%d/%m/%Y'
+            ),
+            'end_date': forms.DateInput(
+                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy'},
+                format='%d/%m/%Y'
+            ),
+        }
+        labels = {
+            'disability': 'Vrsta teškoće',
+            'description': 'Opis prilagodbe',
+            'type': 'Tip',
+            'status': 'Status',
+            'start_date': 'Datum početka',
+            'end_date': 'Datum završetka',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['start_date'].input_formats = ['%d/%m/%Y']
+        self.fields['end_date'].input_formats = ['%d/%m/%Y']
