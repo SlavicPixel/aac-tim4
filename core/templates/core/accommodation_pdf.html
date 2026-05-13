@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Obrazac prilagodbe</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        .header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 16pt;
+        }
+
+        .header .subtitle {
+            font-size: 11pt;
+            color: #555;
+        }
+
+        .meta {
+            text-align: right;
+            font-size: 10pt;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .student-info-left, .student-info-right {
+            width: 48%;
+        }
+
+        .info-row {
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            min-width: 130px;
+        }
+
+        .accommodation-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .guidelines {
+            font-size: 10pt;
+        }
+
+        .guideline-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .guideline-item:last-child {
+            border-bottom: none;
+        }
+
+        .guideline-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .signature-section {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Obrazac akademske prilagodbe</h1>
+        <div class="subtitle">Sveučilište u Rijeci – Sveučilišni savjetovališni centar<br>Savjetovalište za akademsku prilagodbu (AAC)</div>
+    </div>
+
+    <div class="meta">
+        Datum izdavanja: {{ today|date:"d/m/Y" }}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Podaci o studentu</div>
+        <div class="student-info">
+            <div class="student-info-left">
+                <div class="info-row"><span class="info-label">Ime i prezime:</span> {{ student.full_name }}</div>
+                <div class="info-row"><span class="info-label">Datum rođenja:</span> {{ student.date_of_birth|date:"d/m/Y"|default:"-" }}</div>
+                <div class="info-row"><span class="info-label">Spol:</span> {{ student.get_gender_display|default:"-" }}</div>
+            </div>
+            <div class="student-info-right">
+                <div class="info-row"><span class="info-label">Sastavnica:</span> {{ student.faculty }}</div>
+                <div class="info-row"><span class="info-label">Studijski smjer:</span> {{ student.study_program }}</div>
+                <div class="info-row"><span class="info-label">Godina studija:</span> {{ student.year_of_study }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Podaci o prilagodbi</div>
+        <div class="info-row"><span class="info-label">Vrsta teškoće:</span> {{ accommodation.disability.name|default:"-" }}</div>
+        <div class="info-row"><span class="info-label">Tip prilagodbe:</span> {{ accommodation.get_type_display }}</div>
+        <div class="info-row"><span class="info-label">Status:</span> {{ accommodation.get_status_display }}</div>
+        <div class="info-row"><span class="info-label">Datum početka:</span> {{ accommodation.start_date|date:"d/m/Y"|default:"-" }}</div>
+        <div class="info-row"><span class="info-label">Datum završetka:</span> {{ accommodation.end_date|date:"d/m/Y"|default:"-" }}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Opis prilagodbe</div>
+        <div class="accommodation-box">
+            {{ accommodation.description|linebreaks }}
+        </div>
+    </div>
+
+    {% if guidelines %}
+    <div class="section">
+        <div class="section-title">Relevantne smjernice</div>
+        <div class="guidelines">
+            {% for guideline in guidelines %}
+            <div class="guideline-item">
+                <div class="guideline-title">{{ guideline.title }}</div>
+                <div>{{ guideline.content }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">Savjetnik AAC-a</div>
+            <div>{{ counselor.full_name }}</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Pečat i potpis</div>
+        </div>
+    </div>
+</body>
+</html>

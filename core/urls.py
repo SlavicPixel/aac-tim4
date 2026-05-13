@@ -28,6 +28,7 @@ urlpatterns = [
     path('accommodations/<int:pk>/', views.AccommodationDetailView.as_view(), name='accommodation_detail'),
     path('accommodations/<int:pk>/edit/', views.AccommodationUpdateView.as_view(), name='accommodation_update'),
     path('accommodations/<int:pk>/delete/', views.AccommodationDeleteView.as_view(), name='accommodation_delete'),
+    path('accommodations/<int:pk>/pdf/', views.AccommodationPDFView.as_view(), name='accommodation_pdf'),
 
     path('api/guidelines/', views.guidelines_api, name='guidelines_api')
 ]
