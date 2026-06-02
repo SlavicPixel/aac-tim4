@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Mjesečni izvještaj sati – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Mjesečni izvještaj sati</h1>
+    <a href="{% url 'core:peer_support_monthly_report_pdf' %}?period={{ period }}" class="btn btn-primary" target="_blank">
+        Preuzmi PDF
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="period" class="form-label">Razdoblje (YYYY-MM)</label>
+                <input type="month" class="form-control" id="period" name="period" value="{{ period }}">
+            </div>
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-secondary">Prikaži</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Ukupno odrađenih sati</h6>
+                <p class="display-6 mb-0">{{ total_hours }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Broj sesija</h6>
+                <p class="display-6 mb-0">{{ session_count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Razrada po studentima</div>
+    {% if per_student %}
+    <ul class="list-group list-group-flush">
+        {% for row in per_student %}
+        <li class="list-group-item d-flex justify-content-between">
+            <span>{{ row.student.full_name }}</span>
+            <span><strong>{{ row.hours }}</strong> h ({{ row.minutes }} min)</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="card-body text-muted">Nema odrađenih sesija u odabranom razdoblju.</div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">Sve sesije u razdoblju</div>
+    {% if sessions %}
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Student</th>
+                    <th>Trajanje (min)</th>
+                    <th>Opis</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td>{{ session.date|date:"d/m/Y" }}</td>
+                    <td>{{ session.student.full_name }}</td>
+                    <td>{{ session.duration_minutes }}</td>
+                    <td>{{ session.description|default:"–" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card-body text-muted">Nema odrađenih sesija u odabranom razdoblju.</div>
+    {% endif %}
+</div>
+{% endblock %}
