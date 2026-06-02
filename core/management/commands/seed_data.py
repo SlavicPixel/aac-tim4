@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from core.models import (
     Disability, Student, StudentCounselor, Meeting,
-    Accommodation, Guideline,
+    Accommodation, Guideline, PeerSupportSession
 )
 from users.models import Counselor, PeerSupportUser
 
@@ -39,12 +39,14 @@ class Command(BaseCommand):
             students = self._create_students(counselors, peer_supports)
             self._create_meetings(students, counselors)
             self._create_accommodations(students, disabilities)
+            self._create_peer_support_sessions(peer_supports, students)
 
         self.stdout.write(self.style.SUCCESS('Seed completed successfully!'))
         self._print_credentials()
 
     def _reset_data(self):
         """Deletes all data except superusers."""
+        PeerSupportSession.objects.all().delete()
         Meeting.objects.all().delete()
         Accommodation.objects.all().delete()
         StudentCounselor.objects.all().delete()
@@ -208,10 +210,9 @@ class Command(BaseCommand):
                         student=student,
                         counselor=counselors[1]
                     )
-                # Dodjeli peer support prvom studentu
-                if first_name == 'Petra' and peer_supports:
-                    peer_supports[0].student = student
-                    peer_supports[0].save()
+                # Dodijeli peer support za testiranje M:N veze
+                if peer_supports and first_name in ('Petra', 'Iva'):
+                    peer_supports[0].students.add(student)
 
                 self.stdout.write(f'Student "{first_name} {last_name}" created.')
         return students
@@ -269,6 +270,36 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f'Accommodation for {student.full_name} created.')
 
+    def _create_peer_support_sessions(self, peer_supports, students):
+            if not peer_supports or not students:
+                return
+
+            now = timezone.now().date()
+            peer = peer_supports[0]
+            assigned_students = list(peer.students.all())
+            if not assigned_students:
+                return
+
+            sessions_data = [
+                (assigned_students[0], now - timedelta(days=14), 60, 'Pratnja na predavanja i pomoć s bilješkama.'),
+                (assigned_students[0], now - timedelta(days=7), 45, 'Pomoć u snalaženju po kampusu.'),
+                (assigned_students[0], now + timedelta(days=3), 60, 'Dogovoreni termin za pratnju na ispit.'),
+            ]
+            if len(assigned_students) > 1:
+                sessions_data.append(
+                    (assigned_students[1], now - timedelta(days=3), 30, 'Kratka pomoć oko prijave ispita.')
+                )
+
+            for student, session_date, duration, description in sessions_data:
+                PeerSupportSession.objects.create(
+                    peer_support_user=peer,
+                    student=student,
+                    date=session_date,
+                    duration_minutes=duration,
+                    description=description,
+                )
+            self.stdout.write(f'{len(sessions_data)} peer support sessions created.')
+            
     def _print_credentials(self):
         self.stdout.write('')
         self.stdout.write(self.style.NOTICE('=== Test credentials ==='))

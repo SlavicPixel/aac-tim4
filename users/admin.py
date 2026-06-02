@@ -16,6 +16,10 @@ class CounselorAdmin(admin.ModelAdmin):
 
 @admin.register(PeerSupportUser)
 class PeerSupportUserAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'email', 'student']
+    list_display = ['full_name', 'email', 'student_list']
     search_fields = ['user__first_name', 'user__last_name', 'user__email']
-    list_filter = ['student']
+    list_filter = ['students']
+
+    def student_list(self, obj):
+        return ", ".join(s.full_name for s in obj.students.all())
+    student_list.short_description = 'Studenti'
