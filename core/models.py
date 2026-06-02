@@ -232,3 +232,27 @@ class Guideline(models.Model):
 
     def __str__(self):
         return self.title
+    
+class PeerSupportSession(models.Model):
+    date = models.DateField()
+    duration_minutes = models.PositiveIntegerField()
+    description = models.TextField(blank=True)
+
+    peer_support_user = models.ForeignKey(
+        'users.PeerSupportUser',
+        on_delete=models.CASCADE,
+        related_name='sessions'
+    )
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='peer_support_sessions'
+    )
+
+    class Meta:
+        verbose_name = 'Peer Support Session'
+        verbose_name_plural = 'Peer Support Sessions'
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.peer_support_user} – {self.student} ({self.date.strftime('%d/%m/%Y')})"
