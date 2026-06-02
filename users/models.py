@@ -46,13 +46,12 @@ class PeerSupportUser(models.Model):
         on_delete=models.CASCADE,
         related_name='peer_support_profile'
     )
-    student = models.ForeignKey(
-        'core.Student',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='peer_supporters'
-    )
+    
+    students = models.ManyToManyField(
+            'core.Student',
+            related_name='peer_supporters',
+            blank=True
+        )
 
     class Meta:
         verbose_name = 'Peer Support User'
