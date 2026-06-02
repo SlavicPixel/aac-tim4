@@ -30,5 +30,7 @@ urlpatterns = [
     path('accommodations/<int:pk>/delete/', views.AccommodationDeleteView.as_view(), name='accommodation_delete'),
     path('accommodations/<int:pk>/pdf/', views.AccommodationPDFView.as_view(), name='accommodation_pdf'),
 
+    path('peer-support/sesija/nova/', views.PeerSupportSessionCreateView.as_view(), name='peer_support_session_create'),
+
     path('api/guidelines/', views.guidelines_api, name='guidelines_api')
 ]

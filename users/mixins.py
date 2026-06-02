@@ -11,3 +11,13 @@ class CounselorRequiredMixin(LoginRequiredMixin):
             return redirect('core:dashboard')
 
         return super().dispatch(request, *args, **kwargs)
+    
+class PeerSupportRequiredMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+
+        if not hasattr(request.user, 'peer_support_profile'):
+            return redirect('core:dashboard')
+
+        return super().dispatch(request, *args, **kwargs)
