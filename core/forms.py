@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student, Document, Meeting, Accommodation
+from .models import Student, Document, Meeting, Accommodation, PeerSupportSession
 
 
 class StudentForm(forms.ModelForm):
@@ -117,3 +117,31 @@ class AccommodationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['start_date'].input_formats = ['%d/%m/%Y']
         self.fields['end_date'].input_formats = ['%d/%m/%Y']
+
+class PeerSupportSessionForm(forms.ModelForm):
+    class Meta:
+        model = PeerSupportSession
+        fields = ['student', 'date', 'duration_minutes', 'description']
+        widgets = {
+            'date': forms.DateInput(
+                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy'},
+                format='%d/%m/%Y'
+            ),
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+        labels = {
+            'student': 'Student',
+            'date': 'Datum sesije',
+            'duration_minutes': 'Trajanje (minute)',
+            'description': 'Opis',
+        }
+
+    def __init__(self, *args, **kwargs):
+        peer_support = kwargs.pop('peer_support', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['date'].input_formats = ['%d/%m/%Y']
+
+        # Student choices limited to those assigned to this peer support user
+        if peer_support:
+            self.fields['student'].queryset = peer_support.students.filter(is_active=True)

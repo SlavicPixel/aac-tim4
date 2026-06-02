@@ -12,9 +12,9 @@ from calendar import Calendar, month_name
 from datetime import date, datetime
 from weasyprint import HTML
 
-from users.mixins import CounselorRequiredMixin
-from .forms import StudentForm, DocumentForm, MeetingForm, AccommodationForm
-from .models import Student, StudentCounselor, Document, Meeting, Accommodation, Disability, Guideline
+from users.mixins import CounselorRequiredMixin, PeerSupportRequiredMixin
+from .forms import StudentForm, DocumentForm, MeetingForm, AccommodationForm, PeerSupportSessionForm
+from .models import Student, StudentCounselor, Document, Meeting, Accommodation, Disability, Guideline, PeerSupportSession
 
 @login_required
 def dashboard(request):
@@ -646,3 +646,29 @@ class AccommodationPDFView(CounselorRequiredMixin, DetailView):
         response['Content-Disposition'] = f'inline; filename="{filename}"'
 
         return response
+    
+class PeerSupportSessionCreateView(PeerSupportRequiredMixin, CreateView):
+    model = PeerSupportSession
+    form_class = PeerSupportSessionForm
+    template_name = 'core/meeting_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['peer_support'] = self.request.user.peer_support_profile
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.peer_support_user = self.request.user.peer_support_profile
+        response = super().form_valid(form)
+        messages.success(self.request, f'Sesija sa studentom {self.object.student.full_name} je uspješno evidentirana.')
+        return response
+
+    def get_success_url(self):
+        return reverse('core:dashboard')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Evidencija nove sesije vršnjačke podrške'
+        context['submit_label'] = 'Evidentiraj sesiju'
+        context['cancel_url'] = reverse('core:dashboard')
+        return context
