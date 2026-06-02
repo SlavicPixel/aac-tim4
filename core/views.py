@@ -119,6 +119,27 @@ class StudentDetailView(CounselorRequiredMixin, DetailView):
             counselors=self.request.user.counselor_profile
         )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        student = self.object
+
+        peer_support_data = []
+        for peer in student.peer_supporters.all():
+            sessions = PeerSupportSession.objects.filter(
+                peer_support_user=peer,
+                student=student,
+                date__lt=timezone.now().date(),
+            )
+            total_minutes = sum(s.duration_minutes for s in sessions)
+            peer_support_data.append({
+                'peer': peer,
+                'session_count': sessions.count(),
+                'total_hours': round(total_minutes / 60, 1),
+            })
+
+        context['peer_support_data'] = peer_support_data
+        return context
+
 
 class StudentUpdateView(CounselorRequiredMixin, UpdateView):
     model = Student
