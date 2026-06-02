@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Disability, Student, StudentCounselor, Document, Accommodation, Meeting, Guideline
+from .models import Disability, Student, StudentCounselor, Document, Accommodation, Meeting, Guideline, PeerSupportSession
 
 
 @admin.register(Disability)
@@ -47,3 +47,15 @@ class GuidelineAdmin(admin.ModelAdmin):
     list_display = ['title']
     search_fields = ['title', 'content']
     filter_horizontal = ['disabilities']
+
+@admin.register(PeerSupportSession)
+class PeerSupportSessionAdmin(admin.ModelAdmin):
+    list_display = ['peer_support_user', 'student', 'date', 'duration_minutes']
+    list_filter = ['date']
+    search_fields = [
+        'peer_support_user__user__first_name',
+        'peer_support_user__user__last_name',
+        'student__first_name',
+        'student__last_name',
+    ]
+    date_hierarchy = 'date'
