@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-gkv4ee(xki@d13^@rx-wglihrf3dn@sng+9s)0i@qsi6#2!e5+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.2', 'localhost', '0.0.0.0']
 
 
 # Application definition
@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     # Local apps
     'users',
     'core',
-    'meetings',
 ]
 
 MIDDLEWARE = [
