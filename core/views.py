@@ -672,3 +672,35 @@ class PeerSupportSessionCreateView(PeerSupportRequiredMixin, CreateView):
         context['submit_label'] = 'Evidentiraj sesiju'
         context['cancel_url'] = reverse('core:dashboard')
         return context
+    
+class PeerSupportSessionListView(PeerSupportRequiredMixin, ListView):
+    model = PeerSupportSession
+    template_name = 'core/peer_support_session_list.html'
+    context_object_name = 'sessions'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = PeerSupportSession.objects.filter(
+            peer_support_user=self.request.user.peer_support_profile
+        ).select_related('student')
+
+        month = self.request.GET.get('month', '').strip()
+        if month:
+            try:
+                year_str, month_str = month.split('-')
+                queryset = queryset.filter(
+                    date__year=int(year_str),
+                    date__month=int(month_str)
+                )
+            except (ValueError, IndexError):
+                pass
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['selected_month'] = self.request.GET.get('month', '')
+
+        total_minutes = sum(s.duration_minutes for s in self.get_queryset())
+        context['total_hours'] = round(total_minutes / 60, 1)
+        return context
