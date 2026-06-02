@@ -6,7 +6,96 @@
 <h1>Dobrodošli, {{ peer_support.full_name }}</h1>
 <p class="lead">Ovo je vaš dashboard kao studenta vršnjačke podrške.</p>
 
-<div class="alert alert-info">
-    Sadržaj dashboarda dolazi uskoro.
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Dodijeljeni studenti</h6>
+                <p class="display-6 mb-0">{{ students|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Ukupno odrađenih sati</h6>
+                <p class="display-6 mb-0">{{ total_hours }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Sati ovaj mjesec</h6>
+                <p class="display-6 mb-0">{{ month_hours }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">Moji studenti</div>
+            <ul class="list-group list-group-flush">
+                {% for student in students %}
+                <li class="list-group-item">{{ student.full_name }}</li>
+                {% empty %}
+                <li class="list-group-item text-muted">Trenutno vam nije dodijeljen nijedan student.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">Nadolazeće sesije</div>
+            <ul class="list-group list-group-flush">
+                {% for session in upcoming_sessions %}
+                <li class="list-group-item">
+                    <strong>{{ session.date|date:"d/m/Y" }}</strong> – {{ session.student.full_name }}
+                    <span class="text-muted">({{ session.duration_minutes }} min)</span>
+                    {% if session.description %}<br><small>{{ session.description }}</small>{% endif %}
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Nema nadolazećih sesija.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">Odrađene sesije</div>
+            {% if past_sessions %}
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Student</th>
+                            <th>Trajanje (min)</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in past_sessions %}
+                        <tr>
+                            <td>{{ session.date|date:"d/m/Y" }}</td>
+                            <td>{{ session.student.full_name }}</td>
+                            <td>{{ session.duration_minutes }}</td>
+                            <td>{{ session.description|default:"–" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card-body text-muted">Još nema odrađenih sesija.</div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

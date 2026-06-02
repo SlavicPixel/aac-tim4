@@ -25,9 +25,29 @@ def dashboard(request):
             'counselor': user.counselor_profile,
         })
     elif hasattr(user, 'peer_support_profile'):
-        return render(request, 'core/dashboards/peer_support_dashboard.html', {
-            'peer_support': user.peer_support_profile,
-        })
+            peer_support = user.peer_support_profile
+            today = timezone.now().date()
+            sessions = peer_support.sessions.select_related('student')
+
+            upcoming_sessions = sessions.filter(date__gte=today).order_by('date')
+            past_sessions = sessions.filter(date__lt=today).order_by('-date')
+
+            total_minutes = sum(s.duration_minutes for s in past_sessions)
+
+            # Suma minuta za tekući mjesec
+            month_minutes = sum(
+                s.duration_minutes for s in past_sessions
+                if s.date.year == today.year and s.date.month == today.month
+            )
+
+            return render(request, 'core/dashboards/peer_support_dashboard.html', {
+                'peer_support': peer_support,
+                'students': peer_support.students.all(),
+                'upcoming_sessions': upcoming_sessions,
+                'past_sessions': past_sessions,
+                'total_hours': round(total_minutes / 60, 1),
+                'month_hours': round(month_minutes / 60, 1),
+            })
     else:
         return redirect('admin:index')
 
