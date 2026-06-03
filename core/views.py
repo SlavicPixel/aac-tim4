@@ -130,6 +130,11 @@ class StudentListView(CounselorRequiredMixin, ListView):
         search = self.request.GET.get('search', '').strip()
         faculty = self.request.GET.get('faculty', '').strip()
         year = self.request.GET.get('year', '').strip()
+        show_archived = self.request.GET.get('show_archived', '')
+
+        # Defaultno samo aktivni; arhivirani se uključuju samo ako je checkbox označen
+        if not show_archived:
+            queryset = queryset.filter(is_active=True)
 
         if search:
             queryset = queryset.filter(
@@ -150,6 +155,7 @@ class StudentListView(CounselorRequiredMixin, ListView):
         context['search'] = self.request.GET.get('search', '')
         context['faculty'] = self.request.GET.get('faculty', '')
         context['year'] = self.request.GET.get('year', '')
+        context['show_archived'] = self.request.GET.get('show_archived', '')
         return context
     
 class StudentDetailView(CounselorRequiredMixin, DetailView):
