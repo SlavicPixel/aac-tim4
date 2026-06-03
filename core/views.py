@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from calendar import Calendar, month_name
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from weasyprint import HTML
 import openpyxl
 
@@ -57,12 +57,58 @@ def dashboard(request):
             )
             peer_minutes = sum(s.duration_minutes for s in peer_sessions)
 
+            # --- Upozorenja i notifikacije ---
+            threshold_no_meeting = today - timedelta(days=30)
+            expiry_limit = today + timedelta(days=30)
+            upcoming_limit = today + timedelta(days=7)
+
+            # 1. Studenti bez sastanka dulje od 30 dana (gleda zadnji ODRŽANI sastanak)
+            students_without_meetings = []
+            for student in my_students:
+                last_meeting = Meeting.objects.filter(
+                    student=student,
+                    counselor=counselor,
+                    is_active=True,
+                    date_time__date__lt=today,
+                ).order_by('-date_time').first()
+
+                if last_meeting is None:
+                    students_without_meetings.append({
+                        'student': student,
+                        'last_date': None,
+                    })
+                elif last_meeting.date_time.date() < threshold_no_meeting:
+                    students_without_meetings.append({
+                        'student': student,
+                        'last_date': last_meeting.date_time.date(),
+                    })
+
+            # 2. Prilagodbe pri isteku (aktivne, end_date unutar 30 dana)
+            expiring_accommodations = Accommodation.objects.filter(
+                student__in=my_students,
+                status=Accommodation.ACTIVE,
+                end_date__isnull=False,
+                end_date__gte=today,
+                end_date__lte=expiry_limit,
+            ).select_related('student').order_by('end_date')
+
+            # 3. Nadolazeći sastanci (idućih 7 dana)
+            upcoming_meetings = Meeting.objects.filter(
+                counselor=counselor,
+                is_active=True,
+                date_time__date__gte=today,
+                date_time__date__lte=upcoming_limit,
+            ).select_related('student').order_by('date_time')
+
             return render(request, 'core/dashboards/counselor_dashboard.html', {
                 'counselor': counselor,
                 'active_students_count': my_students.count(),
                 'meetings_this_month': meetings_this_month,
                 'active_accommodations_count': active_accommodations,
                 'peer_support_hours': round(peer_minutes / 60, 1),
+                'students_without_meetings': students_without_meetings,
+                'expiring_accommodations': expiring_accommodations,
+                'upcoming_meetings': upcoming_meetings,
             })
     elif hasattr(user, 'peer_support_profile'):
             peer_support = user.peer_support_profile
