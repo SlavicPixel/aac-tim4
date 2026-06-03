@@ -11,6 +11,7 @@
         {% endif %}
     </div>
     <div>
+        <a href="{% url 'core:student_report_pdf' student.pk %}" class="btn btn-outline-primary" target="_blank">Izvještaj (PDF)</a>
         {% if student.is_active %}
             <a href="{% url 'core:student_update' student.pk %}" class="btn btn-secondary">Uredi</a>
             <a href="{% url 'core:student_delete' student.pk %}" class="btn btn-danger">Arhiviraj</a>
