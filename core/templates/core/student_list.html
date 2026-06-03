@@ -86,7 +86,7 @@
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if faculty %}&faculty={{ faculty }}{% endif %}{% if year %}&year={{ year }}{% endif %}">Prethodna</a>
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if faculty %}&faculty={{ faculty }}{% endif %}{% if year %}&year={{ year }}{% endif %}{% if show_archived %}&show_archived={{ show_archived }}{% endif %}">Prethodna</a>
                     </li>
                 {% endif %}
                 <li class="page-item active">
@@ -94,7 +94,7 @@
                 </li>
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if faculty %}&faculty={{ faculty }}{% endif %}{% if year %}&year={{ year }}{% endif %}">Sljedeća</a>
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if faculty %}&faculty={{ faculty }}{% endif %}{% if year %}&year={{ year }}{% endif %}{% if show_archived %}&show_archived={{ show_archived }}{% endif %}">Sljedeća</a>
                     </li>
                 {% endif %}
             </ul>
