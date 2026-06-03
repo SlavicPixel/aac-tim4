@@ -20,6 +20,7 @@ class StudentForm(forms.ModelForm):
                 attrs={
                     'type': 'text',
                     'placeholder': 'dd/mm/yyyy',
+                    'class': 'flatpickr-date',
                 },
                 format='%d/%m/%Y'
             ),
@@ -57,6 +58,7 @@ class MeetingForm(forms.ModelForm):
                 attrs={
                     'type': 'text',
                     'placeholder': 'dd/mm/yyyy HH:MM',
+                    'class': 'flatpickr-datetime',
                 },
                 format='%d/%m/%Y %H:%M'
             ),
@@ -96,11 +98,11 @@ class AccommodationForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5}),
             'start_date': forms.DateInput(
-                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy'},
+                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy', 'class': 'flatpickr-date'},
                 format='%d/%m/%Y'
             ),
             'end_date': forms.DateInput(
-                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy'},
+                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy', 'class': 'flatpickr-date'},
                 format='%d/%m/%Y'
             ),
         }
@@ -124,7 +126,7 @@ class PeerSupportSessionForm(forms.ModelForm):
         fields = ['student', 'date', 'duration_minutes', 'description']
         widgets = {
             'date': forms.DateInput(
-                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy'},
+                attrs={'type': 'text', 'placeholder': 'dd/mm/yyyy', 'class': 'flatpickr-date'},
                 format='%d/%m/%Y'
             ),
             'description': forms.Textarea(attrs={'rows': 4}),
