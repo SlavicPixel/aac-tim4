@@ -21,9 +21,37 @@ def dashboard(request):
     user = request.user
 
     if hasattr(user, 'counselor_profile'):
-        return render(request, 'core/dashboards/counselor_dashboard.html', {
-            'counselor': user.counselor_profile,
-        })
+            counselor = user.counselor_profile
+            today = timezone.now().date()
+
+            my_students = Student.objects.filter(counselors=counselor, is_active=True)
+
+            meetings_this_month = Meeting.objects.filter(
+                counselor=counselor,
+                is_active=True,
+                date_time__year=today.year,
+                date_time__month=today.month,
+            ).count()
+
+            active_accommodations = Accommodation.objects.filter(
+                student__in=my_students,
+                status=Accommodation.ACTIVE,
+            ).count()
+
+            # sati vršnjačke podrške za studente ovog savjetnika (odradjene sesije)
+            peer_sessions = PeerSupportSession.objects.filter(
+                student__in=my_students,
+                date__lt=today,
+            )
+            peer_minutes = sum(s.duration_minutes for s in peer_sessions)
+
+            return render(request, 'core/dashboards/counselor_dashboard.html', {
+                'counselor': counselor,
+                'active_students_count': my_students.count(),
+                'meetings_this_month': meetings_this_month,
+                'active_accommodations_count': active_accommodations,
+                'peer_support_hours': round(peer_minutes / 60, 1),
+            })
     elif hasattr(user, 'peer_support_profile'):
             peer_support = user.peer_support_profile
             today = timezone.now().date()
