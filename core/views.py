@@ -672,6 +672,9 @@ def guidelines_api(request):
     API endpoint that returns guidelines for a given disability.
     Used by the accommodation form to dynamically load guidelines.
     """
+    if not hasattr(request.user, 'counselor_profile'):
+        return JsonResponse({'guidelines': []}, status=403)
+    
     disability_id = request.GET.get('disability')
     if not disability_id:
         return JsonResponse({'guidelines': []})
