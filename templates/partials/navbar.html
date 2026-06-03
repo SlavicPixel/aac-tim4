@@ -7,6 +7,10 @@
                 <a class="nav-link" href="{% url 'core:student_list' %}">Studenti</a>
                 <a class="nav-link" href="{% url 'core:meeting_list' %}">Sastanci</a>
                 <a class="nav-link" href="{% url 'core:meeting_calendar' %}">Kalendar</a>
+            {% elif user.peer_support_profile %}
+                <a class="nav-link" href="{% url 'core:peer_support_session_create' %}">+ Nova sesija</a>
+                <a class="nav-link" href="{% url 'core:peer_support_session_list' %}">Moje sesije</a>
+                <a class="nav-link" href="{% url 'core:peer_support_monthly_report' %}">Mjesečni izvještaj</a>
             {% endif %}
             {% if user.is_superuser %}
                 <a class="nav-link" href="{% url 'core:annual_report' %}">Godišnji izvještaj</a>
