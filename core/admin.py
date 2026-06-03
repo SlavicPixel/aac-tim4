@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Disability, Student, StudentCounselor, Document, Accommodation, Meeting, Guideline, PeerSupportSession
+from .models import Disability, Student, StudentCounselor, Document, Accommodation, Meeting, Guideline, PeerSupportSession, AuditLog
 
 
 @admin.register(Disability)
@@ -59,3 +59,13 @@ class PeerSupportSessionAdmin(admin.ModelAdmin):
         'student__last_name',
     ]
     date_hierarchy = 'date'
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ['timestamp', 'user', 'action', 'model_name', 'object_repr']
+    list_filter = ['action', 'model_name', 'timestamp']
+    search_fields = ['object_repr', 'user__first_name', 'user__last_name']
+    readonly_fields = ['user', 'timestamp', 'action', 'model_name', 'object_id', 'object_repr']
+
+    def has_add_permission(self, request):
+        return False

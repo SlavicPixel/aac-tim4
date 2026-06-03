@@ -16,7 +16,17 @@ import openpyxl
 
 from users.mixins import CounselorRequiredMixin, PeerSupportRequiredMixin, AdminRequiredMixin
 from .forms import StudentForm, DocumentForm, MeetingForm, AccommodationForm, PeerSupportSessionForm
-from .models import Student, StudentCounselor, Document, Meeting, Accommodation, Disability, Guideline, PeerSupportSession
+from .models import Student, StudentCounselor, Document, Meeting, Accommodation, Disability, Guideline, PeerSupportSession, AuditLog
+
+def _log_action(request, action, obj, model_name=None):
+    """zapisuje izmjenu u AuditLogu"""
+    AuditLog.objects.create(
+        user=request.user if request.user.is_authenticated else None,
+        action=action,
+        model_name=model_name or obj.__class__.__name__,
+        object_id=obj.pk,
+        object_repr=str(obj)[:255],
+    )
 
 @login_required
 def dashboard(request):
@@ -91,12 +101,13 @@ class StudentCreateView(CounselorRequiredMixin, CreateView):
     success_url = reverse_lazy('core:student_list')
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        StudentCounselor.objects.create(
-            student=self.object,
-            counselor=self.request.user.counselor_profile
-        )
-        return response
+            response = super().form_valid(form)
+            StudentCounselor.objects.create(
+                student=self.object,
+                counselor=self.request.user.counselor_profile
+            )
+            _log_action(self.request, AuditLog.CREATED, self.object)
+            return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -182,6 +193,11 @@ class StudentUpdateView(CounselorRequiredMixin, UpdateView):
         return Student.objects.filter(
             counselors=self.request.user.counselor_profile
         )
+    
+    def form_valid(self, form):
+            response = super().form_valid(form)
+            _log_action(self.request, AuditLog.UPDATED, self.object)
+            return response
 
     def get_success_url(self):
         return reverse_lazy('core:student_detail', kwargs={'pk': self.object.pk})
@@ -205,11 +221,12 @@ class StudentDeleteView(CounselorRequiredMixin, DeleteView):
         )
 
     def form_valid(self, form):
-        self.object = self.get_object()
-        self.object.is_active = False
-        self.object.save()
-        messages.success(self.request, f'Student {self.object.full_name} je arhiviran.')
-        return redirect(self.success_url)
+            self.object = self.get_object()
+            self.object.is_active = False
+            self.object.save()
+            _log_action(self.request, AuditLog.UPDATED, self.object)
+            messages.success(self.request, f'Student {self.object.full_name} je arhiviran.')
+            return redirect(self.success_url)
 
 
 @login_required
@@ -244,6 +261,7 @@ class DocumentUploadView(CounselorRequiredMixin, CreateView):
         form.instance.student = self.student
         form.instance.file_type = form.cleaned_data['file'].name.split('.')[-1].lower()
         response = super().form_valid(form)
+        _log_action(self.request, AuditLog.CREATED, self.object)
         messages.success(self.request, f'Dokument "{self.object.name}" je uspješno uploadan.')
         return response
 
@@ -275,11 +293,13 @@ class DocumentDeleteView(CounselorRequiredMixin, DeleteView):
         self.object = self.get_object()
         student_pk = self.object.student.pk
         document_name = self.object.name
-        
+
+        _log_action(self.request, AuditLog.DELETED, self.object)
+
         # Delete file from filesystem
         self.object.file.delete(save=False)
         self.object.delete()
-        
+
         messages.success(self.request, f'Dokument "{document_name}" je obrisan.')
         return redirect('core:student_detail', pk=student_pk)
     
@@ -560,10 +580,11 @@ class AccommodationCreateView(CounselorRequiredMixin, CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.student = self.student
-        response = super().form_valid(form)
-        messages.success(self.request, 'Prilagodba je uspješno kreirana.')
-        return response
+            form.instance.student = self.student
+            response = super().form_valid(form)
+            _log_action(self.request, AuditLog.CREATED, self.object)
+            messages.success(self.request, 'Prilagodba je uspješno kreirana.')
+            return response
 
     def get_success_url(self):
         return reverse('core:student_detail', kwargs={'pk': self.student.pk})
@@ -607,6 +628,11 @@ class AccommodationUpdateView(CounselorRequiredMixin, UpdateView):
         return Accommodation.objects.filter(
             student__counselors=self.request.user.counselor_profile
         )
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        _log_action(self.request, AuditLog.UPDATED, self.object)
+        return response
 
     def get_success_url(self):
         return reverse('core:accommodation_detail', kwargs={'pk': self.object.pk})
@@ -635,6 +661,7 @@ class AccommodationDeleteView(CounselorRequiredMixin, DeleteView):
     def form_valid(self, form):
         self.object = self.get_object()
         student_pk = self.object.student.pk
+        _log_action(self.request, AuditLog.DELETED, self.object)
         self.object.delete()
         messages.success(self.request, 'Prilagodba je obrisana.')
         return redirect('core:student_detail', pk=student_pk)
