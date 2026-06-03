@@ -6,6 +6,89 @@
 <h1>Dobrodošli, {{ counselor.full_name }}</h1>
 <p class="lead">Ovo je vaš dashboard kao savjetnika AAC-a.</p>
 
+{# ===== UPOZORENJA I NOTIFIKACIJE ===== #}
+{% if students_without_meetings or expiring_accommodations or upcoming_meetings %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h4 class="mb-3">Upozorenja i podsjetnici</h4>
+    </div>
+</div>
+
+<div class="row">
+    {# 1. Studenti bez sastanka dulje od 30 dana #}
+    {% if students_without_meetings %}
+    <div class="col-md-4 mb-3">
+        <div class="card border-warning h-100">
+            <div class="card-header bg-warning-subtle">
+                Studenti bez sastanka (30+ dana)
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for row in students_without_meetings %}
+                <li class="list-group-item">
+                    <a href="{% url 'core:student_detail' row.student.pk %}">{{ row.student.full_name }}</a>
+                    <br>
+                    <small class="text-muted">
+                        {% if row.last_date %}
+                            Zadnji sastanak: {{ row.last_date|date:"d/m/Y" }}
+                        {% else %}
+                            Nema evidentiranih sastanaka
+                        {% endif %}
+                    </small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    {# 2. Prilagodbe pri isteku #}
+    {% if expiring_accommodations %}
+    <div class="col-md-4 mb-3">
+        <div class="card border-warning h-100">
+            <div class="card-header bg-warning-subtle">
+                Prilagodbe pri isteku (30 dana)
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for accommodation in expiring_accommodations %}
+                <li class="list-group-item">
+                    <a href="{% url 'core:student_detail' accommodation.student.pk %}">{{ accommodation.student.full_name }}</a>
+                    <br>
+                    <small class="text-muted">
+                        Istječe: {{ accommodation.end_date|date:"d/m/Y" }}
+                        {% if accommodation.disability %} – {{ accommodation.disability.name }}{% endif %}
+                    </small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    {# 3. Nadolazeći sastanci (7 dana) #}
+    {% if upcoming_meetings %}
+    <div class="col-md-4 mb-3">
+        <div class="card border-info h-100">
+            <div class="card-header bg-info-subtle">
+                Nadolazeći sastanci (7 dana)
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for meeting in upcoming_meetings %}
+                <li class="list-group-item">
+                    <a href="{% url 'core:student_detail' meeting.student.pk %}">{{ meeting.student.full_name }}</a>
+                    <br>
+                    <small class="text-muted">
+                        {{ meeting.date_time|date:"d/m/Y H:i" }} – {{ meeting.get_type_display }}
+                    </small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{# ===== KRAJ UPOZORENJA ===== #}
+
 <div class="row mt-4">
     <div class="col-md-3">
         <div class="card text-center h-100">
