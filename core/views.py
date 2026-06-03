@@ -984,3 +984,27 @@ class AnnualReportExcelView(AdminRequiredMixin, View):
         response['Content-Disposition'] = f'attachment; filename="godisnji_izvjestaj_{year}.xlsx"'
         wb.save(response)
         return response
+    
+class StudentReportPDFView(CounselorRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        student = get_object_or_404(
+            Student.objects.filter(counselors=request.user.counselor_profile),
+            pk=kwargs['pk']
+        )
+
+        context = {
+            'student': student,
+            'meetings': student.meetings.filter(is_active=True).order_by('-date_time'),
+            'accommodations': student.accommodations.all().order_by('-start_date'),
+            'documents': student.documents.all().order_by('-uploaded_at'),
+            'counselor': request.user.counselor_profile,
+            'today': timezone.now().date(),
+        }
+
+        html_string = render_to_string('core/student_report_pdf.html', context)
+        pdf = HTML(string=html_string).write_pdf()
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"izvjestaj_student_{student.last_name}_{student.first_name}.pdf"
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+        return response

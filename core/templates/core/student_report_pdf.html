@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Individualni izvještaj studenta</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        .header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 16pt;
+        }
+
+        .header .subtitle {
+            font-size: 11pt;
+            color: #555;
+        }
+
+        .meta {
+            text-align: right;
+            font-size: 10pt;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .info-row {
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            min-width: 160px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .empty {
+            color: #777;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Individualni izvještaj studenta</h1>
+        <div class="subtitle">Sveučilište u Rijeci – Sveučilišni savjetovališni centar<br>Savjetovalište za akademsku prilagodbu (AAC)</div>
+    </div>
+
+    <div class="meta">
+        Datum izrade: {{ today|date:"d/m/Y" }}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Osobni podaci</div>
+        <div class="info-row"><span class="info-label">Ime i prezime:</span> {{ student.full_name }}</div>
+        <div class="info-row"><span class="info-label">Datum rođenja:</span> {{ student.date_of_birth|date:"d/m/Y"|default:"–" }}</div>
+        <div class="info-row"><span class="info-label">Spol:</span> {{ student.get_gender_display|default:"–" }}</div>
+        <div class="info-row"><span class="info-label">Adresa:</span> {{ student.address|default:"–" }}</div>
+        <div class="info-row"><span class="info-label">Sastavnica:</span> {{ student.faculty }}</div>
+        <div class="info-row"><span class="info-label">Studijski smjer:</span> {{ student.study_program }}</div>
+        <div class="info-row"><span class="info-label">Godina studija:</span> {{ student.year_of_study }}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Sastanci</div>
+        {% if meetings %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Tip</th>
+                    <th>Format</th>
+                    <th>Bilješke</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for meeting in meetings %}
+                <tr>
+                    <td>{{ meeting.date_time|date:"d/m/Y H:i" }}</td>
+                    <td>{{ meeting.get_type_display }}</td>
+                    <td>{{ meeting.get_format_display }}</td>
+                    <td>{{ meeting.notes|default:"–" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty">Nema evidentiranih sastanaka.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Prilagodbe</div>
+        {% if accommodations %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Vrsta teškoće</th>
+                    <th>Tip</th>
+                    <th>Status</th>
+                    <th>Razdoblje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for accommodation in accommodations %}
+                <tr>
+                    <td>{{ accommodation.disability.name|default:"–" }}</td>
+                    <td>{{ accommodation.get_type_display }}</td>
+                    <td>{{ accommodation.get_status_display }}</td>
+                    <td>
+                        {{ accommodation.start_date|date:"d/m/Y"|default:"–" }}
+                        {% if accommodation.end_date %} – {{ accommodation.end_date|date:"d/m/Y" }}{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty">Nema evidentiranih prilagodbi.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Dokumentacija</div>
+        {% if documents %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Naziv</th>
+                    <th>Tip</th>
+                    <th>Datum učitavanja</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                <tr>
+                    <td>{{ document.name }}</td>
+                    <td>{{ document.file_type|upper }}</td>
+                    <td>{{ document.uploaded_at|date:"d/m/Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty">Nema učitane dokumentacije.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="info-row"><span class="info-label">Savjetnik:</span> {{ counselor.full_name }}</div>
+    </div>
+</body>
+</html>

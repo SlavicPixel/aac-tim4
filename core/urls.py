@@ -39,5 +39,7 @@ urlpatterns = [
     path('annual-report/pdf/', views.AnnualReportPDFView.as_view(), name='annual_report_pdf'),
     path('annual-report/excel/', views.AnnualReportExcelView.as_view(), name='annual_report_excel'),
 
+    path('students/<int:pk>/report/', views.StudentReportPDFView.as_view(), name='student_report_pdf'),
+
     path('api/guidelines/', views.guidelines_api, name='guidelines_api')
 ]
