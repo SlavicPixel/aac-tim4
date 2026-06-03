@@ -256,3 +256,35 @@ class PeerSupportSession(models.Model):
 
     def __str__(self):
         return f"{self.peer_support_user} – {self.student} ({self.date.strftime('%d/%m/%Y')})"
+    
+class AuditLog(models.Model):
+    # sluzi za evidenciju osnovnih izmjena podataka
+    CREATED = 'created'
+    UPDATED = 'updated'
+    DELETED = 'deleted'
+    ACTION_CHOICES = [
+        (CREATED, 'Kreirano'),
+        (UPDATED, 'Izmijenjeno'),
+        (DELETED, 'Obrisano'),
+    ]
+
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs'
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    model_name = models.CharField(max_length=100)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    object_repr = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name = 'Audit Log'
+        verbose_name_plural = 'Audit Logs'
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.timestamp.strftime('%d/%m/%Y %H:%M')} – {self.user} – {self.get_action_display()} {self.model_name} ({self.object_repr})"
