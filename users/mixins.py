@@ -21,3 +21,13 @@ class PeerSupportRequiredMixin(LoginRequiredMixin):
             return redirect('core:dashboard')
 
         return super().dispatch(request, *args, **kwargs)
+    
+class AdminRequiredMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+
+        if not request.user.is_superuser:
+            return redirect('core:dashboard')
+
+        return super().dispatch(request, *args, **kwargs)

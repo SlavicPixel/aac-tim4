@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Godišnji izvještaj rada AAC-a</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        .header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 16pt;
+        }
+
+        .header .subtitle {
+            font-size: 11pt;
+            color: #555;
+        }
+
+        .meta {
+            text-align: right;
+            font-size: 10pt;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .info-row {
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            min-width: 200px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .summary-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Godišnji izvještaj rada</h1>
+        <div class="subtitle">Sveučilište u Rijeci – Sveučilišni savjetovališni centar<br>Savjetovalište za akademsku prilagodbu (AAC)</div>
+    </div>
+
+    <div class="meta">
+        Godina: {{ year }}<br>
+        Datum izrade: {{ today|date:"d/m/Y" }}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Sažetak</div>
+        <div class="summary-box">
+            <div class="info-row"><span class="info-label">Aktivni studenti:</span> {{ active_students }}</div>
+            <div class="info-row"><span class="info-label">Ukupno sastanaka:</span> {{ total_meetings }}</div>
+            <div class="info-row"><span class="info-label">Sati vršnjačke podrške:</span> {{ peer_support_hours }}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Rad po savjetniku</div>
+        {% if per_counselor %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Savjetnik</th>
+                    <th>Broj sastanaka</th>
+                    <th>Broj studenata</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in per_counselor %}
+                <tr>
+                    <td>{{ row.counselor.full_name }}</td>
+                    <td>{{ row.meeting_count }}</td>
+                    <td>{{ row.student_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nema podataka za odabranu godinu.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Zastupljenost vrsta teškoća</div>
+        {% if per_disability %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Vrsta teškoće</th>
+                    <th>Broj studenata</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in per_disability %}
+                <tr>
+                    <td>{{ row.disability.name }}</td>
+                    <td>{{ row.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nema zabilježenih prilagodbi za odabranu godinu.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

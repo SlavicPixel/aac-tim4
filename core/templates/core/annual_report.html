@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Godišnji izvještaj – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Godišnji izvještaj rada AAC-a</h1>
+    <div class="d-flex gap-2">
+        <a href="{% url 'core:annual_report_pdf' %}?year={{ year }}" class="btn btn-primary" target="_blank">Preuzmi PDF</a>
+        <a href="{% url 'core:annual_report_excel' %}?year={{ year }}" class="btn btn-success">Preuzmi Excel</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="year" class="form-label">Godina</label>
+                <select class="form-select" id="year" name="year">
+                    {% for y in available_years %}
+                        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-secondary">Prikaži</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Aktivni studenti</h6>
+                <p class="display-6 mb-0">{{ active_students }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Ukupno sastanaka</h6>
+                <p class="display-6 mb-0">{{ total_meetings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Sati vršnjačke podrške</h6>
+                <p class="display-6 mb-0">{{ peer_support_hours }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Rad po savjetniku</div>
+    {% if per_counselor %}
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Savjetnik</th>
+                    <th>Broj sastanaka</th>
+                    <th>Broj studenata</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in per_counselor %}
+                <tr>
+                    <td>{{ row.counselor.full_name }}</td>
+                    <td>{{ row.meeting_count }}</td>
+                    <td>{{ row.student_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card-body text-muted">Nema podataka za odabranu godinu.</div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">Zastupljenost vrsta teškoća</div>
+    {% if per_disability %}
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Vrsta teškoće</th>
+                    <th>Broj studenata</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in per_disability %}
+                <tr>
+                    <td>{{ row.disability.name }}</td>
+                    <td>{{ row.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card-body text-muted">Nema zabilježenih prilagodbi za odabranu godinu.</div>
+    {% endif %}
+</div>
+{% endblock %}
