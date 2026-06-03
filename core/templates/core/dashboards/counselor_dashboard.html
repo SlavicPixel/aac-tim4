@@ -7,6 +7,41 @@
 <p class="lead">Ovo je vaš dashboard kao savjetnika AAC-a.</p>
 
 <div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Aktivni studenti</h6>
+                <p class="display-6 mb-0">{{ active_students_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Sastanci ovaj mjesec</h6>
+                <p class="display-6 mb-0">{{ meetings_this_month }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Aktivne prilagodbe</h6>
+                <p class="display-6 mb-0">{{ active_accommodations_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Sati vršnjačke podrške</h6>
+                <p class="display-6 mb-0">{{ peer_support_hours }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
