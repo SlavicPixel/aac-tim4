@@ -8,6 +8,9 @@
                 <a class="nav-link" href="{% url 'core:meeting_list' %}">Sastanci</a>
                 <a class="nav-link" href="{% url 'core:meeting_calendar' %}">Kalendar</a>
             {% endif %}
+            {% if user.is_superuser %}
+                <a class="nav-link" href="{% url 'core:annual_report' %}">Godišnji izvještaj</a>
+            {% endif %}
         </div>
 
         <div class="navbar-nav ms-auto">

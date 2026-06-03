@@ -6,13 +6,15 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
+from django.views import View
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from calendar import Calendar, month_name
 from datetime import date, datetime
 from weasyprint import HTML
+import openpyxl
 
-from users.mixins import CounselorRequiredMixin, PeerSupportRequiredMixin
+from users.mixins import CounselorRequiredMixin, PeerSupportRequiredMixin, AdminRequiredMixin
 from .forms import StudentForm, DocumentForm, MeetingForm, AccommodationForm, PeerSupportSessionForm
 from .models import Student, StudentCounselor, Document, Meeting, Accommodation, Disability, Guideline, PeerSupportSession
 
@@ -77,7 +79,9 @@ def dashboard(request):
                 'month_hours': round(month_minutes / 60, 1),
             })
     else:
-        return redirect('admin:index')
+            if user.is_superuser:
+                return redirect('core:annual_report')
+            return redirect('admin:index')
 
 
 class StudentCreateView(CounselorRequiredMixin, CreateView):
@@ -854,4 +858,129 @@ class PeerSupportMonthlyReportPDFView(PeerSupportRequiredMixin, ListView):
         response = HttpResponse(pdf, content_type='application/pdf')
         filename = f"izvjestaj_{peer_support.user.last_name}_{year}_{month:02d}.pdf"
         response['Content-Disposition'] = f'inline; filename="{filename}"'
+        return response
+    
+def _build_annual_report_data(year):
+    """Agregira podatke godišnjeg izvještaja AAC-a za zadanu godinu."""
+    from users.models import Counselor
+
+    # po savjetniku: broj sastanaka i broj jedinstvenih studenata u toj godini
+    per_counselor = []
+    for counselor in Counselor.objects.all():
+        meetings = Meeting.objects.filter(
+            counselor=counselor,
+            is_active=True,
+            date_time__year=year,
+        )
+        student_ids = meetings.values_list('student_id', flat=True).distinct()
+        per_counselor.append({
+            'counselor': counselor,
+            'meeting_count': meetings.count(),
+            'student_count': len(set(student_ids)),
+        })
+
+    total_meetings = Meeting.objects.filter(
+        is_active=True, date_time__year=year
+    ).count()
+    active_students = Student.objects.filter(is_active=True).count()
+
+    peer_minutes = sum(
+        s.duration_minutes for s in PeerSupportSession.objects.filter(date__year=year)
+    )
+
+    # broj jedinstvenih studenata po vrsti teškoce
+    per_disability = []
+    for disability in Disability.objects.all():
+        student_ids = Accommodation.objects.filter(
+            disability=disability,
+            start_date__year=year,
+        ).values_list('student_id', flat=True).distinct()
+        count = len(set(student_ids))
+        if count > 0:
+            per_disability.append({
+                'disability': disability,
+                'count': count,
+            })
+
+    return {
+        'year': year,
+        'per_counselor': per_counselor,
+        'total_meetings': total_meetings,
+        'active_students': active_students,
+        'peer_support_hours': round(peer_minutes / 60, 1),
+        'per_disability': per_disability,
+    }
+
+class AnnualReportView(AdminRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        year = self._get_year(request)
+        data = _build_annual_report_data(year)
+        data['available_years'] = self._available_years()
+        return render(request, 'core/annual_report.html', data)
+
+    def _get_year(self, request):
+        year_param = request.GET.get('year', '').strip()
+        if year_param.isdigit():
+            return int(year_param)
+        return timezone.now().year
+
+    def _available_years(self):
+        years = set()
+        for m in Meeting.objects.all():
+            years.add(m.date_time.year)
+        years.add(timezone.now().year)
+        return sorted(years, reverse=True)
+
+
+class AnnualReportPDFView(AdminRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        year_param = request.GET.get('year', '').strip()
+        year = int(year_param) if year_param.isdigit() else timezone.now().year
+
+        data = _build_annual_report_data(year)
+        data['today'] = timezone.now().date()
+
+        html_string = render_to_string('core/annual_report_pdf.html', data)
+        pdf = HTML(string=html_string).write_pdf()
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="godisnji_izvjestaj_{year}.pdf"'
+        return response
+
+
+class AnnualReportExcelView(AdminRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        year_param = request.GET.get('year', '').strip()
+        year = int(year_param) if year_param.isdigit() else timezone.now().year
+
+        data = _build_annual_report_data(year)
+
+        wb = openpyxl.Workbook()
+
+        # List 1: Sažetak
+        ws = wb.active
+        ws.title = 'Sažetak'
+        ws.append([f'Godišnji izvještaj AAC-a za {year}. godinu'])
+        ws.append([])
+        ws.append(['Aktivni studenti', data['active_students']])
+        ws.append(['Ukupno sastanaka', data['total_meetings']])
+        ws.append(['Sati vršnjačke podrške', data['peer_support_hours']])
+
+        # List 2: Po savjetniku
+        ws2 = wb.create_sheet('Po savjetniku')
+        ws2.append(['Savjetnik', 'Broj sastanaka', 'Broj studenata'])
+        for row in data['per_counselor']:
+            ws2.append([row['counselor'].full_name, row['meeting_count'], row['student_count']])
+
+        # List 3: Vrste teškoća
+        ws3 = wb.create_sheet('Vrste teškoća')
+        ws3.append(['Vrsta teškoće', 'Broj studenata'])
+        for row in data['per_disability']:
+            ws3.append([row['disability'].name, row['count']])
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="godisnji_izvjestaj_{year}.xlsx"'
+        wb.save(response)
         return response

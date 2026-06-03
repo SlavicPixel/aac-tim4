@@ -35,5 +35,9 @@ urlpatterns = [
     path('peer-support-report/', views.PeerSupportMonthlyReportView.as_view(), name='peer_support_monthly_report'),
     path('peer-support-report/pdf/', views.PeerSupportMonthlyReportPDFView.as_view(), name='peer_support_monthly_report_pdf'),
 
+    path('annual-report/', views.AnnualReportView.as_view(), name='annual_report'),
+    path('annual-report/pdf/', views.AnnualReportPDFView.as_view(), name='annual_report_pdf'),
+    path('annual-report/excel/', views.AnnualReportExcelView.as_view(), name='annual_report_excel'),
+
     path('api/guidelines/', views.guidelines_api, name='guidelines_api')
 ]
