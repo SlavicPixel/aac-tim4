@@ -15,7 +15,7 @@
         <form method="get" class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label for="period" class="form-label">Razdoblje (YYYY-MM)</label>
-                <input type="month" class="form-control" id="period" name="period" value="{{ period }}">
+                <input type="text" class="form-control flatpickr-month" id="period" name="period" value="{{ period }}" placeholder="Odaberite mjesec">
             </div>
             <div class="col-md-8">
                 <button type="submit" class="btn btn-secondary">Prikaži</button>
