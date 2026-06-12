@@ -17,6 +17,8 @@ from .accommodations import (
 from .peer_support import (
     PeerSupportSessionCreateView, PeerSupportSessionListView,
     PeerSupportMonthlyReportView, PeerSupportMonthlyReportPDFView,
+    PeerSupportSessionDetailView, PeerSupportSessionUpdateView,
+    PeerSupportSessionDeleteView
 )
 from .reports import (
     AnnualReportView, AnnualReportPDFView,

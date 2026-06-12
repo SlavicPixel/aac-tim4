@@ -32,6 +32,9 @@ urlpatterns = [
 
     path('peer-support-sessions/', views.PeerSupportSessionListView.as_view(), name='peer_support_session_list'),
     path('peer-support-sessions/new/', views.PeerSupportSessionCreateView.as_view(), name='peer_support_session_create'),
+    path('peer-support-sessions/<int:pk>/', views.PeerSupportSessionDetailView.as_view(), name='peer_support_session_detail'),
+    path('peer-support-sessions/<int:pk>/edit/', views.PeerSupportSessionUpdateView.as_view(), name='peer_support_session_update'),
+    path('peer-support-sessions/<int:pk>/delete/', views.PeerSupportSessionDeleteView.as_view(), name='peer_support_session_delete'),
     path('peer-support-report/', views.PeerSupportMonthlyReportView.as_view(), name='peer_support_monthly_report'),
     path('peer-support-report/pdf/', views.PeerSupportMonthlyReportPDFView.as_view(), name='peer_support_monthly_report_pdf'),
 
