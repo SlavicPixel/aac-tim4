@@ -220,3 +220,6 @@ __marimo__/
 # Media files
 /media/*
 !/media/.gitkeep
+
+# Static files
+staticfiles/

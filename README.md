@@ -5,9 +5,11 @@ Aplikacija za evidenciju sastanaka s AAC, prilagodbu studiranja i praćenje stud
 ## Tehnologije
 
 - **Backend:** Django (Python)
-- **Frontend:** Django templating + Bootstrap 5 (preko crispy-forms)
+- **Frontend:** Django templating + Bootstrap 5 (preko crispy-forms), flatpickr (odabir datuma)
 - **Baza podataka:** PostgreSQL 17 (Docker)
-- **Generiranje dokumenata:** WeasyPrint, ReportLab, openpyxl
+- **Generiranje dokumenata:** WeasyPrint, openpyxl
+- **Posluživanje statičkih datoteka:** WhiteNoise
+- **Konfiguracija:** python-decouple (čitanje varijabli iz .env)
 
 ## Preduvjeti
 
@@ -95,7 +97,13 @@ python manage.py seed_data --reset
 
 **Napomena:** `--reset` briše sve podatke osim superusera kreiranog ručno kroz `createsuperuser`.
 
-### 7. Pokreni development server
+### 7. Prikupi statičke datoteke
+
+```bash
+python manage.py collectstatic --noinput
+```
+
+### 8. Pokreni development server
 
 ```bash
 python manage.py runserver
@@ -110,7 +118,6 @@ aac-tim4/
 ├── aac_tim4/           # glavni Django projekt (settings, urls)
 ├── users/              # autentifikacija, User model, peer support
 ├── core/               # Student, Accommodation, Disability, Document
-├── meetings/           # sastanci, kalendar
 ├── templates/          # globalni templates (base.html, partials)
 ├── static/             # globalni static fileovi
 ├── media/              # uploadane datoteke
