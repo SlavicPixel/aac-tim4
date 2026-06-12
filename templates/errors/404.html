@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Stranica nije pronađena{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-1 fw-bold text-muted">404</h1>
+    <h2 class="mb-3">Stranica nije pronađena</h2>
+    <p class="lead text-muted mb-4">Tražena stranica ne postoji ili je premještena.</p>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-primary">Povratak na početnu</a>
+</div>
+{% endblock %}
