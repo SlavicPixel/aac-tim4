@@ -52,6 +52,14 @@
                 <label for="date_to" class="form-label">Do</label>
                 <input type="text" class="form-control" id="date_to" name="date_to" value="{{ date_to }}" placeholder="dd/mm/yyyy">
             </div>
+            <div class="col-md-2">
+                <label for="status" class="form-label">Prikaz</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Aktivni sastanci</option>
+                    <option value="archived" {% if selected_status == 'archived' %}selected{% endif %}>Arhivirani sastanci</option>
+                    <option value="all" {% if selected_status == 'all' %}selected{% endif %}>Svi sastanci</option>
+                </select>
+            </div>
             <div class="col-md-12 d-flex gap-2">
                 <button type="submit" class="btn btn-secondary">Filtriraj</button>
                 <a href="{% url 'core:meeting_list' %}" class="btn btn-outline-secondary">Reset</a>
@@ -74,11 +82,14 @@
                 </thead>
                 <tbody>
                     {% for meeting in meetings %}
-                        <tr class="clickable-row" data-href="{% url 'core:meeting_detail' meeting.pk %}">
+                        <tr class="clickable-row{% if not meeting.is_active %} table-secondary text-muted{% endif %}" data-href="{% url 'core:meeting_detail' meeting.pk %}">
                             <td>{{ meeting.date_time|date:"d/m/Y H:i" }}</td>
                             <td>{{ meeting.student.full_name }}</td>
                             <td>{{ meeting.get_type_display }}</td>
-                            <td>{{ meeting.get_format_display }}</td>
+                            <td>
+                                {{ meeting.get_format_display }}
+                                {% if not meeting.is_active %}<span class="badge bg-secondary">Arhiviran</span>{% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -91,7 +102,7 @@
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prethodna</a>
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_student %}&student={{ selected_student }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_format %}&format={{ selected_format }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Prethodna</a>
                     </li>
                 {% endif %}
                 <li class="page-item active">
@@ -99,7 +110,7 @@
                 </li>
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Sljedeća</a>
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_student %}&student={{ selected_student }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_format %}&format={{ selected_format }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Sljedeća</a>
                     </li>
                 {% endif %}
             </ul>
