@@ -67,8 +67,13 @@ class MeetingListView(CounselorRequiredMixin, ListView):
     def get_queryset(self):
         queryset = Meeting.objects.filter(
             counselor=self.request.user.counselor_profile,
-            is_active=True
         ).select_related('student')
+
+        status = self.request.GET.get('status', 'active').strip()
+        if status == 'active':
+            queryset = queryset.filter(is_active=True)
+        elif status == 'archived':
+            queryset = queryset.filter(is_active=False)
 
         student_id = self.request.GET.get('student', '').strip()
         meeting_type = self.request.GET.get('type', '').strip()
@@ -116,6 +121,7 @@ class MeetingListView(CounselorRequiredMixin, ListView):
         context['selected_format'] = self.request.GET.get('format', '')
         context['date_from'] = self.request.GET.get('date_from', '')
         context['date_to'] = self.request.GET.get('date_to', '')
+        context['selected_status'] = self.request.GET.get('status', 'active')
         return context
 
 
