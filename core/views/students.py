@@ -164,5 +164,6 @@ def student_reactivate(request, pk):
     )
     student.is_active = True
     student.save()
+    _log_action(request, AuditLog.UPDATED, student)
     messages.success(request, f'Student {student.full_name} je reaktiviran.')
     return redirect('core:student_detail', pk=student.pk)
