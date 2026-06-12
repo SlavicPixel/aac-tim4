@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Moje sesije – AAC Tim 4{% endblock %}
 
@@ -41,7 +42,7 @@
                 </thead>
                 <tbody>
                     {% for session in sessions %}
-                        <tr>
+                        <tr class="clickable-row" data-href="{% url 'core:peer_support_session_detail' session.pk %}">
                             <td>{{ session.date|date:"d/m/Y" }}</td>
                             <td>{{ session.student.full_name }}</td>
                             <td>{{ session.duration_minutes }}</td>
@@ -77,4 +78,8 @@
         Nema sesija koje odgovaraju filteru.
     </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/clickable_rows.js' %}"></script>
 {% endblock %}

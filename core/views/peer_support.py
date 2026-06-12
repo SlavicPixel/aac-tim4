@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView
 
 from weasyprint import HTML
 
@@ -171,3 +171,60 @@ class PeerSupportMonthlyReportPDFView(PeerSupportRequiredMixin, ListView):
         filename = f"izvjestaj_{peer_support.user.last_name}_{year}_{month:02d}.pdf"
         response['Content-Disposition'] = f'inline; filename="{filename}"'
         return response
+    
+class PeerSupportSessionDetailView(PeerSupportRequiredMixin, DetailView):
+    model = PeerSupportSession
+    template_name = 'core/peer_support_session_detail.html'
+    context_object_name = 'session'
+
+    def get_queryset(self):
+        return PeerSupportSession.objects.filter(
+            peer_support_user=self.request.user.peer_support_profile
+        ).select_related('student')
+
+
+class PeerSupportSessionUpdateView(PeerSupportRequiredMixin, UpdateView):
+    model = PeerSupportSession
+    form_class = PeerSupportSessionForm
+    template_name = 'core/meeting_form.html'
+
+    def get_queryset(self):
+        return PeerSupportSession.objects.filter(
+            peer_support_user=self.request.user.peer_support_profile
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['peer_support'] = self.request.user.peer_support_profile
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Sesija je uspješno ažurirana.')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('core:peer_support_session_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Uređivanje sesije vršnjačke podrške'
+        context['submit_label'] = 'Spremi promjene'
+        context['cancel_url'] = reverse('core:peer_support_session_detail', kwargs={'pk': self.object.pk})
+        return context
+
+
+class PeerSupportSessionDeleteView(PeerSupportRequiredMixin, DeleteView):
+    model = PeerSupportSession
+    template_name = 'core/peer_support_session_confirm_delete.html'
+
+    def get_queryset(self):
+        return PeerSupportSession.objects.filter(
+            peer_support_user=self.request.user.peer_support_profile
+        )
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Sesija je obrisana.')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('core:peer_support_session_list')

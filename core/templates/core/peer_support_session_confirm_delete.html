@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Brisanje sesije – AAC Tim 4{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="mb-3">Brisanje sesije</h2>
+                <p>Jeste li sigurni da želite obrisati sesiju sa studentom <strong>{{ object.student.full_name }}</strong> ({{ object.date|date:"d/m/Y" }})?</p>
+                <p class="text-muted">Ova radnja je trajna i sesija se ne može vratiti.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'core:peer_support_session_detail' object.pk %}" class="btn btn-secondary">Odustani</a>
+                    <button type="submit" class="btn btn-danger">Obriši</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
