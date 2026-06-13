@@ -83,6 +83,24 @@
             color: #777;
             font-style: italic;
         }
+
+        .signature-section {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+            page-break-inside: avoid;
+        }
+
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 50px;
+        }
     </style>
 </head>
 <body>
@@ -191,8 +209,14 @@
         {% endif %}
     </div>
 
-    <div class="section">
-        <div class="info-row"><span class="info-label">Savjetnik:</span> {{ counselor.full_name }}</div>
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">Savjetnik AAC-a</div>
+            <div>{{ counselor.full_name }}</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Pečat i potpis</div>
+        </div>
     </div>
 </body>
 </html>
