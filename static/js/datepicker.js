@@ -19,14 +19,17 @@ document.addEventListener('DOMContentLoaded', function () {
         allowInput: true,
     });
 
-    flatpickr('.flatpickr-month', {
-        plugins: [
-            new monthSelectPlugin({
-                shorthand: false,
-                dateFormat: 'Y-m',
-                altFormat: 'F Y',
-                altInput: true,
-            })
-        ],
-    });
+    const monthInputs = document.querySelectorAll('.flatpickr-month');
+    if (monthInputs.length > 0 && typeof monthSelectPlugin !== 'undefined') {
+        flatpickr(monthInputs, {
+            plugins: [
+                new monthSelectPlugin({
+                    shorthand: false,
+                    dateFormat: 'Y-m',
+                    altFormat: 'F Y',
+                    altInput: true,
+                })
+            ],
+        });
+    }
 });
